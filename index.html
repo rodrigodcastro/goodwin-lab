@@ -1,0 +1,1333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Goodwin Cycle Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+/* BASICS */
+
+.CodeMirror {
+  /* Set height, width, borders, and global font properties here */
+  font-family: monospace;
+  height: 300px;
+  color: black;
+  direction: ltr;
+}
+
+/* PADDING */
+
+.CodeMirror-lines {
+  padding: 4px 0; /* Vertical padding around content */
+}
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
+  padding: 0 4px; /* Horizontal padding of content */
+}
+
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+  background-color: white; /* The little square between H and V scrollbars */
+}
+
+/* GUTTER */
+
+.CodeMirror-gutters {
+  border-right: 1px solid #ddd;
+  background-color: #f7f7f7;
+  white-space: nowrap;
+}
+.CodeMirror-linenumbers {}
+.CodeMirror-linenumber {
+  padding: 0 3px 0 5px;
+  min-width: 20px;
+  text-align: right;
+  color: #999;
+  white-space: nowrap;
+}
+
+.CodeMirror-guttermarker { color: black; }
+.CodeMirror-guttermarker-subtle { color: #999; }
+
+/* CURSOR */
+
+.CodeMirror-cursor {
+  border-left: 1px solid black;
+  border-right: none;
+  width: 0;
+}
+/* Shown when moving in bi-directional text */
+.CodeMirror div.CodeMirror-secondarycursor {
+  border-left: 1px solid silver;
+}
+.cm-fat-cursor .CodeMirror-cursor {
+  width: auto;
+  border: 0 !important;
+  background: #7e7;
+}
+.cm-fat-cursor div.CodeMirror-cursors {
+  z-index: 1;
+}
+.cm-fat-cursor .CodeMirror-line::selection,
+.cm-fat-cursor .CodeMirror-line > span::selection, 
+.cm-fat-cursor .CodeMirror-line > span > span::selection { background: transparent; }
+.cm-fat-cursor .CodeMirror-line::-moz-selection,
+.cm-fat-cursor .CodeMirror-line > span::-moz-selection,
+.cm-fat-cursor .CodeMirror-line > span > span::-moz-selection { background: transparent; }
+.cm-fat-cursor { caret-color: transparent; }
+@-moz-keyframes blink {
+  0% {}
+  50% { background-color: transparent; }
+  100% {}
+}
+@-webkit-keyframes blink {
+  0% {}
+  50% { background-color: transparent; }
+  100% {}
+}
+@keyframes blink {
+  0% {}
+  50% { background-color: transparent; }
+  100% {}
+}
+
+/* Can style cursor different in overwrite (non-insert) mode */
+.CodeMirror-overwrite .CodeMirror-cursor {}
+
+.cm-tab { display: inline-block; text-decoration: inherit; }
+
+.CodeMirror-rulers {
+  position: absolute;
+  left: 0; right: 0; top: -50px; bottom: 0;
+  overflow: hidden;
+}
+.CodeMirror-ruler {
+  border-left: 1px solid #ccc;
+  top: 0; bottom: 0;
+  position: absolute;
+}
+
+/* DEFAULT THEME */
+
+.cm-s-default .cm-header {color: blue;}
+.cm-s-default .cm-quote {color: #090;}
+.cm-negative {color: #d44;}
+.cm-positive {color: #292;}
+.cm-header, .cm-strong {font-weight: bold;}
+.cm-em {font-style: italic;}
+.cm-link {text-decoration: underline;}
+.cm-strikethrough {text-decoration: line-through;}
+
+.cm-s-default .cm-keyword {color: #708;}
+.cm-s-default .cm-atom {color: #219;}
+.cm-s-default .cm-number {color: #164;}
+.cm-s-default .cm-def {color: #00f;}
+.cm-s-default .cm-variable,
+.cm-s-default .cm-punctuation,
+.cm-s-default .cm-property,
+.cm-s-default .cm-operator {}
+.cm-s-default .cm-variable-2 {color: #05a;}
+.cm-s-default .cm-variable-3, .cm-s-default .cm-type {color: #085;}
+.cm-s-default .cm-comment {color: #a50;}
+.cm-s-default .cm-string {color: #a11;}
+.cm-s-default .cm-string-2 {color: #f50;}
+.cm-s-default .cm-meta {color: #555;}
+.cm-s-default .cm-qualifier {color: #555;}
+.cm-s-default .cm-builtin {color: #30a;}
+.cm-s-default .cm-bracket {color: #997;}
+.cm-s-default .cm-tag {color: #170;}
+.cm-s-default .cm-attribute {color: #00c;}
+.cm-s-default .cm-hr {color: #999;}
+.cm-s-default .cm-link {color: #00c;}
+
+.cm-s-default .cm-error {color: #f00;}
+.cm-invalidchar {color: #f00;}
+
+.CodeMirror-composing { border-bottom: 2px solid; }
+
+/* Default styles for common addons */
+
+div.CodeMirror span.CodeMirror-matchingbracket {color: #0b0;}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #a22;}
+.CodeMirror-matchingtag { background: rgba(255, 150, 0, .3); }
+.CodeMirror-activeline-background {background: #e8f2ff;}
+
+/* STOP */
+
+/* The rest of this file contains styles related to the mechanics of
+   the editor. You probably shouldn't touch them. */
+
+.CodeMirror {
+  position: relative;
+  overflow: hidden;
+  background: white;
+}
+
+.CodeMirror-scroll {
+  overflow: scroll !important; /* Things will break if this is overridden */
+  /* 50px is the magic margin used to hide the element's real scrollbars */
+  /* See overflow: hidden in .CodeMirror */
+  margin-bottom: -50px; margin-right: -50px;
+  padding-bottom: 50px;
+  height: 100%;
+  outline: none; /* Prevent dragging from highlighting the element */
+  position: relative;
+  z-index: 0;
+}
+.CodeMirror-sizer {
+  position: relative;
+  border-right: 50px solid transparent;
+}
+
+/* The fake, visible scrollbars. Used to force redraw during scrolling
+   before actual scrolling happens, thus preventing shaking and
+   flickering artifacts. */
+.CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+  position: absolute;
+  z-index: 6;
+  display: none;
+  outline: none;
+}
+.CodeMirror-vscrollbar {
+  right: 0; top: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.CodeMirror-hscrollbar {
+  bottom: 0; left: 0;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+.CodeMirror-scrollbar-filler {
+  right: 0; bottom: 0;
+}
+.CodeMirror-gutter-filler {
+  left: 0; bottom: 0;
+}
+
+.CodeMirror-gutters {
+  position: absolute; left: 0; top: 0;
+  min-height: 100%;
+  z-index: 3;
+}
+.CodeMirror-gutter {
+  white-space: normal;
+  height: 100%;
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: -50px;
+}
+.CodeMirror-gutter-wrapper {
+  position: absolute;
+  z-index: 4;
+  background: none !important;
+  border: none !important;
+}
+.CodeMirror-gutter-background {
+  position: absolute;
+  top: 0; bottom: 0;
+  z-index: 4;
+}
+.CodeMirror-gutter-elt {
+  position: absolute;
+  cursor: default;
+  z-index: 4;
+}
+.CodeMirror-gutter-wrapper ::selection { background-color: transparent }
+.CodeMirror-gutter-wrapper ::-moz-selection { background-color: transparent }
+
+.CodeMirror-lines {
+  cursor: text;
+  min-height: 1px; /* prevents collapsing before first draw */
+}
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
+  /* Reset some styles that the rest of the page might have set */
+  -moz-border-radius: 0; -webkit-border-radius: 0; border-radius: 0;
+  border-width: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0;
+  white-space: pre;
+  word-wrap: normal;
+  line-height: inherit;
+  color: inherit;
+  z-index: 2;
+  position: relative;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-variant-ligatures: contextual;
+  font-variant-ligatures: contextual;
+}
+.CodeMirror-wrap pre.CodeMirror-line,
+.CodeMirror-wrap pre.CodeMirror-line-like {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+
+.CodeMirror-linebackground {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 0;
+}
+
+.CodeMirror-linewidget {
+  position: relative;
+  z-index: 2;
+  padding: 0.1px; /* Force widget margins to stay inside of the container */
+}
+
+.CodeMirror-widget {}
+
+.CodeMirror-rtl pre { direction: rtl; }
+
+.CodeMirror-code {
+  outline: none;
+}
+
+/* Force content-box sizing for the elements where we expect it */
+.CodeMirror-scroll,
+.CodeMirror-sizer,
+.CodeMirror-gutter,
+.CodeMirror-gutters,
+.CodeMirror-linenumber {
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+.CodeMirror-measure {
+  position: absolute;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.CodeMirror-cursor {
+  position: absolute;
+  pointer-events: none;
+}
+.CodeMirror-measure pre { position: static; }
+
+div.CodeMirror-cursors {
+  visibility: hidden;
+  position: relative;
+  z-index: 3;
+}
+div.CodeMirror-dragcursors {
+  visibility: visible;
+}
+
+.CodeMirror-focused div.CodeMirror-cursors {
+  visibility: visible;
+}
+
+.CodeMirror-selected { background: #d9d9d9; }
+.CodeMirror-focused .CodeMirror-selected { background: #d7d4f0; }
+.CodeMirror-crosshair { cursor: crosshair; }
+.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: #d7d4f0; }
+.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: #d7d4f0; }
+
+.cm-searching {
+  background-color: #ffa;
+  background-color: rgba(255, 255, 0, .4);
+}
+
+/* Used to force a border model for a node */
+.cm-force-border { padding-right: .1px; }
+
+@media print {
+  /* Hide the cursor when printing */
+  .CodeMirror div.CodeMirror-cursors {
+    visibility: hidden;
+  }
+}
+
+/* See issue #2901 */
+.cm-tab-wrap-hack:after { content: ''; }
+
+/* Help users use markselection to safely style text background */
+span.CodeMirror-selectedtext { background: none; }
+
+</style>
+  <style>
+:root {
+  --bg: #f4f2ec;
+  --panel: #fffdf8;
+  --ink: #1d232b;
+  --muted: #6b7280;
+  --line: #e2ddd1;
+  --u: #c2502b;      /* wage share */
+  --v: #1f7a8c;      /* employment */
+  --eq: #8a8f98;
+  --accent: #1f7a8c;
+  --warn-bg: #fff4e0;
+  --warn-ink: #8a5300;
+  --err-bg: #fde8e6;
+  --err-ink: #a1261b;
+  --ok: #2f9e44;
+  --radius: 12px;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161b; --panel: #1a2027; --ink: #e8e6e1; --muted: #9aa3ad; --line: #2a323b;
+    --u: #ee7a52; --v: #4fb3c6; --eq: #7d8590; --accent: #4fb3c6;
+    --warn-bg: #3a2c12; --warn-ink: #f2c06b; --err-bg: #3d1a17; --err-ink: #ff9b8f; --ok: #51cf66;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161b; --panel: #1a2027; --ink: #e8e6e1; --muted: #9aa3ad; --line: #2a323b;
+  --u: #ee7a52; --v: #4fb3c6; --eq: #7d8590; --accent: #4fb3c6;
+  --warn-bg: #3a2c12; --warn-ink: #f2c06b; --err-bg: #3d1a17; --err-ink: #ff9b8f; --ok: #51cf66;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.5 "IBM Plex Sans", system-ui, sans-serif;
+}
+.top {
+  display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  padding-block: 20px 12px; max-width: 1280px; margin: 0 auto;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.brand h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+.backend {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel); font: 12.5px var(--mono);
+}
+.backend .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+body[data-state="ready"] .backend .dot { background: var(--ok); }
+body[data-state="error"] .backend .dot { background: var(--err-ink); }
+
+.layout {
+  display: grid; grid-template-columns: 300px 1fr; gap: 16px;
+  max-width: 1280px; margin: 0 auto; padding-block: 8px 32px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.controls { padding: 14px 16px; align-self: start; position: sticky; top: calc(12px + env(safe-area-inset-top, 0px)); }
+.group + .group { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.group h2 {
+  margin: 0 0 8px; font-size: 11.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+.param { margin: 8px 0; }
+.param label { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; }
+.param output { font: 12.5px var(--mono); color: var(--accent); }
+.param input[type="range"] { width: 100%; accent-color: var(--accent); margin: 4px 0 0; }
+.actions { margin-top: 14px; }
+button {
+  font: inherit; font-size: 13.5px; padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--ink);
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+
+.content { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.status { font: 12.5px var(--mono); color: var(--muted); min-height: 20px; }
+body[data-state="error"] .status { color: var(--err-ink); background: var(--err-bg); padding: 8px 12px; border-radius: 8px; }
+.warnings { background: var(--warn-bg); color: var(--warn-ink); padding: 8px 12px; border-radius: 8px; font-size: 13.5px; }
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.chart { margin: 0; padding: 12px 14px 10px; min-width: 0; }
+.chart figcaption { font-weight: 600; font-size: 13.5px; margin-bottom: 6px; }
+.muted { color: var(--muted); font-weight: 400; }
+.canvas-box { position: relative; height: 320px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.stat .k { font-size: 12px; color: var(--muted); }
+.stat .val { font: 500 17px var(--mono); margin-top: 2px; }
+
+.model { padding: 10px 14px; }
+.model summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.model-body { font-size: 14px; color: var(--ink); }
+.model .eq { font: 14px var(--mono); background: var(--bg); padding: 8px 10px; border-radius: 8px; overflow-x: auto; }
+code { font: 13px var(--mono); }
+
+@media (max-width: 900px) {
+  .layout, .top {
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .layout { grid-template-columns: 1fr; padding-block: 8px 24px; }
+  .top { padding-block: 16px 8px; }
+  .controls { position: static; }
+  .charts { grid-template-columns: 1fr; }
+  .canvas-box { height: 260px; }
+}
+
+/* ---------------- code editor + tech info ---------------- */
+:root {
+  --code-bg: #fbfaf6; --code-gutter: #f1eee6; --code-ln: #9a9488; --code-ink: #24292f;
+  --tk-kw: #8b2fa3; --tk-def: #1d5fa8; --tk-str: #2f7d32; --tk-num: #b5520b; --tk-com: #8a8f98;
+  --tk-builtin: #0e7490; --tk-op: #6b4e16; --tk-meta: #a8551e;
+  --code-sel: #d7e8ec; --code-active: #f3efe4; --code-err: #fde3df; --code-ro: #eef4f2;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --code-bg: #141a20; --code-gutter: #182028; --code-ln: #5f6b77; --code-ink: #dfe3e8;
+    --tk-kw: #d29cf0; --tk-def: #7cb7ff; --tk-str: #9fd88f; --tk-num: #f2a96b; --tk-com: #6f7b86;
+    --tk-builtin: #6fd3e6; --tk-op: #e0c48a; --tk-meta: #f0a070;
+    --code-sel: #24414a; --code-active: #1b232b; --code-err: #4a1f1b; --code-ro: #16221f;
+  }
+}
+:root[data-theme="dark"] {
+  --code-bg: #141a20; --code-gutter: #182028; --code-ln: #5f6b77; --code-ink: #dfe3e8;
+  --tk-kw: #d29cf0; --tk-def: #7cb7ff; --tk-str: #9fd88f; --tk-num: #f2a96b; --tk-com: #6f7b86;
+  --tk-builtin: #6fd3e6; --tk-op: #e0c48a; --tk-meta: #f0a070;
+  --code-sel: #24414a; --code-active: #1b232b; --code-err: #4a1f1b; --code-ro: #16221f;
+}
+
+.top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+button.ghost { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); }
+button.ghost svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 500; }
+button.primary:hover { color: var(--panel); filter: brightness(1.08); }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.55; cursor: progress; }
+
+.wrap {
+  max-width: 1280px; margin: 0 auto; padding-block: 0 40px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.code { padding: 0; overflow: hidden; }
+.code summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px 16px; cursor: pointer; font-weight: 600; font-size: 14px; list-style: none;
+}
+.code summary::-webkit-details-marker { display: none; }
+.code summary::before { content: "▸"; color: var(--muted); margin-right: 2px; transition: transform .15s; }
+.code[open] summary::before { transform: rotate(90deg); }
+.code-title { flex: 1; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.code-title code { color: var(--muted); font-weight: 400; }
+.pill {
+  font: 500 12px var(--mono); padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--muted); background: var(--bg);
+}
+.pill.editable { color: var(--accent); border-color: var(--accent); }
+.pill.readonly { color: var(--u); border-color: var(--u); }
+.code-body { border-top: 1px solid var(--line); padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+.code-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.code-note { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 70ch; }
+.code-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.editor-box { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; }
+.code-status { font: 12.5px var(--mono); color: var(--muted); min-height: 18px; }
+.code-status.err { color: var(--err-ink); }
+.code-status.ok { color: var(--ok); }
+.code-status.dirty { color: var(--warn-ink); }
+
+/* CodeMirror theme, driven by the tokens above */
+.CodeMirror {
+  height: 480px; font: 13px/1.6 var(--mono); background: var(--code-bg); color: var(--code-ink);
+}
+.CodeMirror-gutters { background: var(--code-gutter); border-right: 1px solid var(--line); }
+.CodeMirror-linenumber { color: var(--code-ln); padding: 0 10px 0 6px; }
+.CodeMirror-cursor { border-left: 2px solid var(--accent); }
+.CodeMirror-selected, .CodeMirror-focused .CodeMirror-selected { background: var(--code-sel); }
+.CodeMirror-activeline-background { background: var(--code-active); }
+.CodeMirror-matchingbracket { color: var(--accent) !important; font-weight: 600; text-decoration: underline; }
+.cm-s-goodwin.readonly .CodeMirror-scroll, .cm-s-goodwin.readonly { background: var(--code-ro); }
+.cm-s-goodwin .cm-keyword { color: var(--tk-kw); font-weight: 500; }
+.cm-s-goodwin .cm-def { color: var(--tk-def); font-weight: 500; }
+.cm-s-goodwin .cm-string, .cm-s-goodwin .cm-string-2 { color: var(--tk-str); }
+.cm-s-goodwin .cm-number { color: var(--tk-num); }
+.cm-s-goodwin .cm-comment { color: var(--tk-com); font-style: italic; }
+.cm-s-goodwin .cm-builtin { color: var(--tk-builtin); }
+.cm-s-goodwin .cm-operator { color: var(--tk-op); }
+.cm-s-goodwin .cm-meta { color: var(--tk-meta); }
+.cm-s-goodwin .cm-variable-2, .cm-s-goodwin .cm-property { color: var(--code-ink); }
+.cm-s-goodwin .cm-atom { color: var(--tk-num); }
+.cm-error-line { background: var(--code-err); }
+
+/* Tech info dialog */
+.tech {
+  width: min(680px, calc(100% - 32px)); max-height: calc(100% - 48px); padding: 0;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--panel); color: var(--ink);
+}
+.tech::backdrop { background: rgba(10, 14, 20, 0.45); }
+.tech-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel);
+}
+.tech-head h2 { margin: 0; font-size: 17px; font-weight: 600; }
+.tech-body { padding: 6px 18px 18px; font-size: 14px; }
+.tech-body h3 {
+  margin: 16px 0 6px; font-size: 11.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+.tech-body table { width: 100%; border-collapse: collapse; }
+.tech-body td { padding: 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tech-body td:first-child { width: 42%; padding-right: 12px; }
+.tech-body td:last-child { font: 13px var(--mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tech-body .role { display: block; color: var(--muted); font-size: 12.5px; }
+.tech-body .na { color: var(--muted); }
+
+@media (max-width: 900px) {
+  .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .CodeMirror { height: 380px; font-size: 12.5px; }
+}
+
+/* feedback after a code reload */
+@keyframes flash-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+.flash { animation: flash-ring 0.9s ease-out 1; }
+.param.changed { border-radius: 8px; background: color-mix(in srgb, var(--accent) 12%, transparent); outline: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); outline-offset: 3px; }
+.param.changed label span::after { content: " · updated"; color: var(--accent); font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
+
+</style>
+</head>
+<body data-state="loading">
+  <header class="top">
+    <div class="brand">
+      <h1>Goodwin Cycle Lab</h1>
+      <p>Wage share × employment rate dynamics · Python numerics, JavaScript interface</p>
+    </div>
+    <div class="top-actions">
+      <div class="backend" id="backend" title="Where the Python code is running">
+        <span class="dot"></span><span id="backend-text">starting…</span>
+      </div>
+      <button id="tech-open" class="ghost" type="button" aria-haspopup="dialog">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.01"></path></svg>
+        Tech info
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel controls" aria-label="Parameters">
+      <div id="controls"></div>
+      <div class="actions">
+        <button id="reset" type="button">Reset defaults</button>
+      </div>
+    </aside>
+
+    <section class="content">
+      <div id="status" class="status" role="status">Loading…</div>
+      <div id="warnings" class="warnings" hidden></div>
+
+      <div class="charts">
+        <figure class="panel chart">
+          <figcaption>Time series</figcaption>
+          <div class="canvas-box"><canvas id="ts-chart" aria-label="Wage share and employment over time"></canvas></div>
+        </figure>
+        <figure class="panel chart">
+          <figcaption>Phase portrait <span class="muted">(v, u)</span></figcaption>
+          <div class="canvas-box"><canvas id="phase-chart" aria-label="Phase portrait"></canvas></div>
+        </figure>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <details class="panel model">
+        <summary>Model &amp; architecture</summary>
+        <div class="model-body">
+          <p class="eq">u̇ = u (−γ + ρv − α) &nbsp;&nbsp;&nbsp; v̇ = v ((1 − u)/σ − α − β)</p>
+          <p>u is the wage share, v the employment rate. The interior equilibrium is
+            v* = (α+γ)/ρ and u* = 1 − σ(α+β). Orbits are closed cycles; the conserved quantity
+            H(u,v) is tracked to report numerical drift.</p>
+          <p>The solver is a plain Python module (<code>core/goodwin.py</code>). In <b>browser</b> mode it runs in
+            Pyodide (CPython compiled to WebAssembly) in a Web Worker; in <b>server</b> mode the identical file
+            runs behind FastAPI. The front end only talks to <code>api.js</code>.</p>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <section class="wrap code-wrap">
+    <details class="panel code" id="code">
+      <summary>
+        <span class="code-title">Python source <code id="code-file">core/goodwin.py</code></span>
+        <span class="pill" id="code-mode">loading…</span>
+      </summary>
+      <div class="code-body">
+        <div class="code-toolbar">
+          <p class="code-note" id="code-note"></p>
+          <div class="code-buttons" id="code-buttons" hidden>
+            <button id="code-run" class="primary" type="button" title="Ctrl/⌘ + Enter">Run changes</button>
+            <button id="code-revert" type="button">Revert to original</button>
+          </div>
+        </div>
+        <div class="editor-box"><textarea id="code-editor" aria-label="Python source code" spellcheck="false"></textarea></div>
+        <div class="code-status" id="code-status" role="status"></div>
+      </div>
+    </details>
+  </section>
+
+  <dialog id="tech" class="tech" aria-labelledby="tech-title">
+    <div class="tech-head">
+      <h2 id="tech-title">Tech info</h2>
+      <button id="tech-close" class="ghost" type="button" aria-label="Close">✕</button>
+    </div>
+    <div id="tech-body" class="tech-body">Collecting versions…</div>
+  </dialog>
+
+  <script>
+    // Standalone build: Python source and worker are embedded below.
+    (function () {
+      const q = new URLSearchParams(location.search);
+      const apiBase = q.get("api");
+      window.APP_CONFIG = {
+        mode: apiBase ? "server" : "browser",
+        baseUrl: apiBase || "",
+        moduleName: "goodwin",
+        pythonSource: "\"\"\"\nGoodwin (1967) growth-cycle model \u2014 pure Python, no dependencies.\n\nThis module is the \"Python block\" of the app. It is deliberately free of any\nbrowser or server code, so the very same file runs:\n  * inside the browser (Pyodide, loaded by web/py-runtime.js), and\n  * on a server (imported by server/main.py with FastAPI).\n\nContract: every public function takes JSON-friendly keyword arguments and\nreturns JSON-friendly values (dict / list / float / str). Invalid input raises\nValueError, which both transports turn into an error message for the UI.\n\nModel (u = wage share, v = employment rate):\n    du/dt = u * (phi(v) - alpha)            phi(v) = -gamma + rho * v\n    dv/dt = v * ((1 - u) / sigma - alpha - beta)\n\n    alpha : labour-productivity growth rate\n    beta  : labour-force growth rate\n    sigma : capital-output ratio\n    gamma, rho : linear Phillips curve (wage growth vs. employment)\n\nInterior equilibrium:  v* = (alpha + gamma) / rho,  u* = 1 - sigma (alpha + beta)\nThe system is Lotka-Volterra-like and conserves\n    H(u, v) = u/sigma - a ln u + rho v - c ln v,  a = 1/sigma - alpha - beta, c = alpha + gamma\nso orbits are closed cycles; the drift of H measures numerical error.\n\"\"\"\n\nimport math\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\")\n\nMAX_STEPS = 200_000\nMAX_POINTS = 2_000\n\n_PARAMS = [\n    # name, label, default, min, max, step, group\n    (\"alpha\", \"Productivity growth \u03b1\", 0.02, 0.0, 0.10, 0.001, \"economy\"),\n    (\"beta\", \"Labour-force growth \u03b2\", 0.01, 0.0, 0.10, 0.001, \"economy\"),\n    (\"sigma\", \"Capital-output ratio \u03c3\", 3.0, 0.5, 8.0, 0.1, \"economy\"),\n    (\"gamma\", \"Phillips intercept \u03b3\", 0.4, 0.0, 2.0, 0.01, \"phillips\"),\n    (\"rho\", \"Phillips slope \u03c1\", 0.5, 0.05, 3.0, 0.01, \"phillips\"),\n    (\"u0\", \"Initial wage share u\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"v0\", \"Initial employment v\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"t_max\", \"Horizon (years)\", 100.0, 1.0, 500.0, 1.0, \"numerics\"),\n    (\"dt\", \"Step size (years)\", 0.05, 0.001, 1.0, 0.001, \"numerics\"),\n]\n\n\ndef describe():\n    \"\"\"Parameter metadata, so the UI can build its controls from Python.\"\"\"\n    return {\n        \"model\": \"Goodwin growth cycle\",\n        \"method\": \"Classical Runge-Kutta 4 (fixed step)\",\n        \"parameters\": [\n            {\"name\": n, \"label\": l, \"default\": d, \"min\": lo, \"max\": hi, \"step\": s, \"group\": g}\n            for n, l, d, lo, hi, s, g in _PARAMS\n        ],\n    }\n\n\ndef _defaults():\n    return {p[0]: p[2] for p in _PARAMS}\n\n\ndef _clean(params):\n    \"\"\"Merge with defaults, coerce to float and validate. Raises ValueError.\"\"\"\n    unknown = set(params) - set(_defaults())\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s): {', '.join(sorted(unknown))}\")\n    p = _defaults()\n    for k, val in params.items():\n        try:\n            x = float(val)\n        except (TypeError, ValueError):\n            raise ValueError(f\"Parameter '{k}' must be a number, got {val!r}\")\n        if not math.isfinite(x):\n            raise ValueError(f\"Parameter '{k}' must be finite\")\n        p[k] = x\n    for k in (\"sigma\", \"rho\", \"u0\", \"v0\", \"t_max\", \"dt\"):\n        if p[k] <= 0:\n            raise ValueError(f\"Parameter '{k}' must be > 0\")\n    for k in (\"alpha\", \"beta\", \"gamma\"):\n        if p[k] < 0:\n            raise ValueError(f\"Parameter '{k}' must be >= 0\")\n    if p[\"t_max\"] / p[\"dt\"] > MAX_STEPS:\n        raise ValueError(f\"Too many steps (t_max/dt > {MAX_STEPS}); increase dt or reduce t_max\")\n    return p\n\n\ndef _eq(p):\n    u_star = 1.0 - p[\"sigma\"] * (p[\"alpha\"] + p[\"beta\"])\n    v_star = (p[\"alpha\"] + p[\"gamma\"]) / p[\"rho\"]\n    return u_star, v_star\n\n\ndef equilibrium(**params):\n    \"\"\"Interior equilibrium and small-oscillation period.\"\"\"\n    p = _clean(params)\n    u_star, v_star = _eq(p)\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    period = 2.0 * math.pi / math.sqrt(a * c) if a > 0 and c > 0 else None\n    return {\n        \"u_star\": u_star,\n        \"v_star\": v_star,\n        \"interior\": u_star > 0 and v_star > 0,\n        \"linear_period\": period,\n    }\n\n\ndef _rhs(u, v, p):\n    du = u * (-p[\"gamma\"] + p[\"rho\"] * v - p[\"alpha\"])\n    dv = v * ((1.0 - u) / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"])\n    return du, dv\n\n\ndef _invariant(u, v, p):\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    return u / p[\"sigma\"] - a * math.log(u) + p[\"rho\"] * v - c * math.log(v)\n\n\ndef simulate(**params):\n    \"\"\"Integrate the model with RK4. Returns time series plus diagnostics.\"\"\"\n    p = _clean(params)\n    dt, n = p[\"dt\"], int(round(p[\"t_max\"] / p[\"dt\"]))\n    u, v = p[\"u0\"], p[\"v0\"]\n    stride = max(1, math.ceil((n + 1) / MAX_POINTS))\n\n    ts, us, vs = [0.0], [u], [v]\n    u_star, v_star = _eq(p)\n    crossings = []  # times u crosses u* upwards -> period estimate\n    h0 = _invariant(u, v, p)\n    h_drift = 0.0\n\n    for i in range(1, n + 1):\n        k1 = _rhs(u, v, p)\n        k2 = _rhs(u + 0.5 * dt * k1[0], v + 0.5 * dt * k1[1], p)\n        k3 = _rhs(u + 0.5 * dt * k2[0], v + 0.5 * dt * k2[1], p)\n        k4 = _rhs(u + dt * k3[0], v + dt * k3[1], p)\n        un = u + dt / 6.0 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0])\n        vn = v + dt / 6.0 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1])\n        if not (math.isfinite(un) and math.isfinite(vn)) or un <= 0 or vn <= 0:\n            raise ValueError(f\"Integration became unstable at t={i * dt:.3f}; try a smaller dt\")\n        if u < u_star <= un:\n            crossings.append((i - 1 + (u_star - u) / (un - u)) * dt)\n        u, v = un, vn\n        h_drift = max(h_drift, abs(_invariant(u, v, p) - h0))\n        if i % stride == 0 or i == n:\n            ts.append(i * dt)\n            us.append(u)\n            vs.append(v)\n\n    period = None\n    if len(crossings) >= 2:\n        period = (crossings[-1] - crossings[0]) / (len(crossings) - 1)\n\n    warnings = []\n    if max(vs) > 1.0:\n        warnings.append(\"Employment rate exceeds 100% on the orbit (v > 1).\")\n    if max(us) > 1.0:\n        warnings.append(\"Wage share exceeds 100% on the orbit (u > 1).\")\n    if u_star <= 0:\n        warnings.append(\"No interior equilibrium: u* \u2264 0 (\u03c3(\u03b1+\u03b2) \u2265 1).\")\n\n    return {\n        \"params\": p,\n        \"t\": ts,\n        \"u\": us,\n        \"v\": vs,\n        \"equilibrium\": {\"u_star\": u_star, \"v_star\": v_star},\n        \"summary\": {\n            \"steps\": n,\n            \"u_min\": min(us), \"u_max\": max(us),\n            \"v_min\": min(vs), \"v_max\": max(vs),\n            \"period\": period,\n            \"invariant_drift\": h_drift / abs(h0) if h0 else h_drift,\n        },\n        \"warnings\": warnings,\n    }\n",
+        workerSource: "/*\n * py-runtime.js \u2014 runs a Python module inside the browser with Pyodide (CPython on WebAssembly).\n *\n * The same file works in two places:\n *   1. As a module Web Worker script (preferred: Python runs off the UI thread).\n *   2. As a plain <script> on the main thread (fallback when Workers are unavailable,\n *      e.g. some sandboxed iframes). It then just defines createPyRuntime().\n *\n * It knows nothing about the Goodwin model: it loads whatever module source it is given\n * and dispatches calls to that module's public functions, passing JSON in and out \u2014\n * exactly the same contract the HTTP server uses later.\n */\n\n/* eslint-disable no-restricted-globals */\n\n/* Python-side host code: imports the module, dispatches calls, and supports live reload. */\nconst HOST_PY = String.raw`\nimport sys, json, importlib, traceback, platform\nsys.dont_write_bytecode = True          # never reuse a stale .pyc after an edit\nif \"/app\" not in sys.path:\n    sys.path.insert(0, \"/app\")\n\ndef _public(mod):\n    return set(getattr(mod, \"PUBLIC_FUNCTIONS\",\n                       [n for n in dir(mod) if not n.startswith(\"_\") and callable(getattr(mod, n))]))\n\ndef _import():\n    importlib.invalidate_caches()\n    sys.modules.pop(_NAME, None)\n    return importlib.import_module(_NAME)\n\ndef _boot(name):\n    global _NAME, _PATH, _mod, _allowed\n    _NAME, _PATH = name, f\"/app/{name}.py\"\n    _mod = _import()\n    _allowed = _public(_mod)\n\ndef _dispatch(fn, args_json):\n    if fn not in _allowed:\n        raise LookupError(f\"Unknown function: {fn}\")\n    return json.dumps(getattr(_mod, fn)(**json.loads(args_json)), allow_nan=False)\n\ndef _error_line(e):\n    line = getattr(e, \"lineno\", None) if isinstance(e, SyntaxError) else None\n    if line is None:\n        frames = [f for f in traceback.extract_tb(e.__traceback__) if f.filename == _PATH]\n        line = frames[-1].lineno if frames else None\n    return line\n\ndef _reload(source):\n    \"\"\"Swap in new module source. On any error keep the previous, working module.\"\"\"\n    global _mod, _allowed\n    with open(_PATH) as f:\n        old = f.read()\n    with open(_PATH, \"w\") as f:\n        f.write(source)\n    try:\n        mod = _import()\n        allowed = _public(mod)\n        if not allowed:\n            raise ValueError(\"The module exposes no public functions\")\n    except BaseException as e:\n        with open(_PATH, \"w\") as f:\n            f.write(old)\n        sys.modules[_NAME] = _mod\n        return json.dumps({\"ok\": False, \"error\": {\"type\": type(e).__name__, \"message\": str(e), \"line\": _error_line(e)}})\n    _mod, _allowed = mod, allowed\n    return json.dumps({\"ok\": True, \"functions\": sorted(allowed)})\n\ndef _source():\n    with open(_PATH) as f:\n        return f.read()\n\ndef _info():\n    emsc = getattr(sys, \"_emscripten_info\", None)\n    return json.dumps({\n        \"python\": sys.version.split()[0],\n        \"implementation\": platform.python_implementation(),\n        \"platform\": sys.platform,\n        \"emscripten\": \".\".join(map(str, emsc.emscripten_version)) if emsc else None,\n        \"module\": _NAME,\n        \"functions\": sorted(_allowed),\n    })\n`;\n\nasync function createPyRuntime({ indexURL, options, moduleName, source, loadPyodideFn }) {\n  const py = await loadPyodideFn({ ...(options || {}), indexURL });\n  py.FS.mkdirTree(\"/app\");\n  py.FS.writeFile(`/app/${moduleName}.py`, source);\n  py.runPython(HOST_PY);\n  py.globals.get(\"_boot\")(moduleName);\n  const fns = Object.fromEntries([\"_dispatch\", \"_reload\", \"_source\", \"_info\"].map((n) => [n, py.globals.get(n)]));\n\n  // Internal operations use reserved \"__name__\" ids, which can never be module functions.\n  const internal = {\n    __reload__: (args) => {\n      const out = JSON.parse(fns._reload(String(args.source)));\n      if (!out.ok) throw Object.assign(new Error(out.error.message), { pyError: out.error });\n      return out;\n    },\n    __source__: () => ({ source: fns._source(), readonly: false }),\n    __info__: () => ({ ...JSON.parse(fns._info()), pyodide: py.version }),\n  };\n\n  return {\n    version: py.version,\n    call(fn, args) {\n      try {\n        if (internal[fn]) return { ok: true, result: internal[fn](args || {}) };\n        return { ok: true, result: JSON.parse(fns._dispatch(fn, JSON.stringify(args || {}))) };\n      } catch (e) {\n        return { ok: false, error: e.pyError || pythonErrorToObject(e, moduleName) };\n      }\n    },\n  };\n}\n\n/* Turn a Pyodide PythonError (full traceback) into { type, message, line } \u2014 the server's shape,\n   plus the line in the user's module where it failed (for the editor). */\nfunction pythonErrorToObject(e, moduleName) {\n  const text = String((e && e.message) || e);\n  const lines = text.trim().split(\"\\n\").filter(Boolean);\n  const last = lines[lines.length - 1] || text;\n  const m = last.match(/^([A-Za-z_][\\w.]*(?:Error|Exception|Warning|Interrupt|Exit)):\\s*(.*)$/);\n  const out = m ? { type: m[1].split(\".\").pop(), message: m[2] } : { type: \"Error\", message: last };\n  const re = new RegExp(`File \"/app/${moduleName}\\\\.py\", line (\\\\d+)`, \"g\");\n  let hit, line = null;\n  while ((hit = re.exec(text))) line = Number(hit[1]);\n  if (line) out.line = line;\n  return out;\n}\n\n/* ---------- Worker mode ---------- */\nif (typeof WorkerGlobalScope !== \"undefined\" && self instanceof WorkerGlobalScope) {\n  let runtime = null;\n  self.onmessage = async ({ data }) => {\n    if (data.type === \"init\") {\n      try {\n        // Current Pyodide ships as an ES module, so this must run as a module worker.\n        const { loadPyodide } = await import(data.indexURL + \"pyodide.mjs\");\n        runtime = await createPyRuntime({ ...data, loadPyodideFn: loadPyodide });\n        self.postMessage({ type: \"ready\", version: runtime.version });\n      } catch (e) {\n        self.postMessage({ type: \"init-error\", error: { type: \"InitError\", message: String(e && e.message || e) } });\n      }\n      return;\n    }\n    if (data.type === \"call\") {\n      const t0 = performance.now();\n      const out = runtime\n        ? runtime.call(data.fn, data.args)\n        : { ok: false, error: { type: \"InitError\", message: \"Python runtime not ready\" } };\n      self.postMessage({ type: \"result\", id: data.id, ms: performance.now() - t0, ...out });\n    }\n  };\n}\n",
+      };
+    })();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/selection/active-line.min.js"></script>
+  <script>
+/*
+ * api.js — the ONLY bridge between the JavaScript front end and the Python logic.
+ *
+ * The front end calls:   const api = PyApi.create(config);  await api.call("simulate", {...})
+ * and never knows where Python runs. Two interchangeable backends:
+ *
+ *   mode "browser" : Python runs client-side in Pyodide (WebAssembly), inside a Web Worker
+ *                    (falls back to the main thread if Workers are blocked).
+ *   mode "server"  : the same Python module runs behind FastAPI; calls become
+ *                    POST {baseUrl}/api/{fn} with a JSON body.
+ *
+ * Both backends: JSON in, JSON out, async, errors surface as Error with .pyType (and .line
+ * when it points into the module). Besides call(), both offer:
+ *   getSource()  → { source, readonly }     the module's Python source
+ *   reload(src)  → swap in edited source     browser only (server code is read-only)
+ *   techInfo()   → versions of the Python side
+ * Migrating to a classic web app = switching mode to "server". Nothing else changes.
+ */
+(function (global) {
+  "use strict";
+
+  const DEFAULT_PYODIDE = "https://cdn.jsdelivr.net/npm/pyodide@314.0.7/";
+
+  function toError(err) {
+    const e = new Error(err && err.message ? err.message : String(err));
+    e.pyType = (err && err.type) || "Error";
+    if (err && err.line) e.line = err.line;
+    return e;
+  }
+
+  /* ----------------------------------------------------------- browser backend */
+  function browserBackend(cfg) {
+    const status = cfg.onStatus || (() => {});
+    const indexURL = cfg.pyodideIndexURL || global.PYODIDE_INDEX_URL || DEFAULT_PYODIDE;
+    let callImpl = null;
+    let pyodideOptions = {};
+    let info = { kind: "browser", runtime: "?" };
+
+    async function getSource() {
+      if (cfg.pythonSource) return cfg.pythonSource;
+      const r = await fetch(cfg.pythonUrl);
+      if (!r.ok) throw new Error(`Could not load ${cfg.pythonUrl} (HTTP ${r.status})`);
+      return r.text();
+    }
+
+    /* Where the worker script can come from. An embedded worker (standalone build) is tried as a
+       blob: URL, then as a data: URL (pages opened from file:// in Chrome reject blob workers). */
+    function workerUrls() {
+      if (!cfg.workerSource) return [cfg.workerUrl];
+      const urls = [];
+      try { urls.push(URL.createObjectURL(new Blob([cfg.workerSource], { type: "text/javascript" }))); } catch (e) { /* ignore */ }
+      urls.push("data:text/javascript;charset=utf-8," + encodeURIComponent(cfg.workerSource));
+      return urls;
+    }
+
+    function startWorker(source, url) {
+      return new Promise((resolve, reject) => {
+        let worker;
+        try {
+          worker = new Worker(url, { type: "module" });
+        } catch (e) {
+          reject(e);
+          return;
+        }
+        const pending = new Map();
+        let nextId = 1;
+        let ready = false;
+        worker.onerror = (ev) => {
+          if (!ready) reject(new Error(ev.message || "Worker failed to start"));
+        };
+        worker.onmessage = ({ data }) => {
+          if (data.type === "ready") {
+            ready = true;
+            info = { kind: "browser", runtime: `Pyodide ${data.version} · Web Worker` };
+            resolve((fn, args) =>
+              new Promise((res, rej) => {
+                const id = nextId++;
+                pending.set(id, { res, rej });
+                worker.postMessage({ type: "call", id, fn, args });
+              }));
+          } else if (data.type === "init-error") {
+            reject(toError(data.error));
+          } else if (data.type === "result") {
+            const p = pending.get(data.id);
+            pending.delete(data.id);
+            data.ok ? p.res(data.result) : p.rej(toError(data.error));
+          }
+        };
+        worker.postMessage({ type: "init", indexURL, options: pyodideOptions, moduleName: cfg.moduleName, source });
+      });
+    }
+
+    function loadScript(src) {
+      return new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = src;
+        s.onload = res;
+        s.onerror = () => rej(new Error("Failed to load " + src));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function startMainThread(source) {
+      if (typeof global.createPyRuntime !== "function") {
+        if (cfg.workerSource) (0, eval)(cfg.workerSource); // defines createPyRuntime
+        else await loadScript(cfg.workerUrl);
+      }
+      const { loadPyodide } = await import(indexURL + "pyodide.mjs");
+      const rt = await global.createPyRuntime({
+        indexURL, options: pyodideOptions, moduleName: cfg.moduleName, source, loadPyodideFn: loadPyodide,
+      });
+      info = { kind: "browser", runtime: `Pyodide ${rt.version} · main thread` };
+      return async (fn, args) => {
+        const out = rt.call(fn, args);
+        if (!out.ok) throw toError(out.error);
+        return out.result;
+      };
+    }
+
+    const ready = (async () => {
+      status("Downloading Python (Pyodide/WebAssembly)…");
+      const source = await getSource();
+      // Optional extra loadPyodide() options (e.g. a self-hosted stdLibURL); may be a Promise.
+      pyodideOptions = (await (cfg.pyodideOptions || global.PYODIDE_OPTIONS)) || {};
+      if (cfg.useWorker !== false && typeof Worker !== "undefined") {
+        for (const url of workerUrls()) {
+          try {
+            callImpl = await startWorker(source, url);
+            return;
+          } catch (e) {
+            console.warn("Worker unavailable (" + url.slice(0, 30) + "…):", e);
+          }
+        }
+        status("Starting Python on the main thread…");
+      }
+      callImpl = await startMainThread(source);
+    })();
+
+    async function call(fn, args) {
+      await ready;
+      return callImpl(fn, args);
+    }
+
+    return {
+      ready,
+      editable: true,
+      get info() { return info; },
+      call,
+      getSource: () => call("__source__"),
+      reload: (source) => call("__reload__", { source }),
+      techInfo: async () => ({ location: "browser", ...(await call("__info__")) }),
+    };
+  }
+
+  /* ------------------------------------------------------------ server backend */
+  function serverBackend(cfg) {
+    const base = (cfg.baseUrl || "").replace(/\/$/, "");
+    const info = { kind: "server", runtime: `HTTP · ${base || location.origin}/api` };
+    async function get(path) {
+      let r;
+      try {
+        r = await fetch(`${base}/api/${path}`);
+      } catch (e) {
+        throw toError({ type: "NetworkError", message: "Cannot reach the server: " + e.message });
+      }
+      const body = await r.json().catch(() => null);
+      if (!r.ok) throw toError((body && body.error) || { type: "HTTPError", message: `HTTP ${r.status}` });
+      return body;
+    }
+
+    return {
+      ready: Promise.resolve(),
+      editable: false,
+      info,
+      getSource: () => get("source"),
+      reload: async () => {
+        throw toError({ type: "ReadOnly", message: "Server code is read-only here: edit the file and redeploy." });
+      },
+      techInfo: async () => ({ location: "server", ...(await get("info")) }),
+      async call(fn, args) {
+        let r;
+        try {
+          r = await fetch(`${base}/api/${encodeURIComponent(fn)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args || {}),
+          });
+        } catch (e) {
+          throw toError({ type: "NetworkError", message: "Cannot reach the server: " + e.message });
+        }
+        const body = await r.json().catch(() => null);
+        if (!r.ok) throw toError((body && body.error) || { type: "HTTPError", message: `HTTP ${r.status}` });
+        return body;
+      },
+    };
+  }
+
+  global.PyApi = {
+    create(cfg) {
+      return cfg.mode === "server" ? serverBackend(cfg) : browserBackend(cfg);
+    },
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+  <script>
+/*
+ * app.js — UI only: parameter controls, charts, summary.
+ * All numerics come from Python through api.js. This file never touches Pyodide or HTTP.
+ */
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const cfg = window.APP_CONFIG;
+  const state = { meta: null, params: {}, running: false, dirty: false, last: null, runs: 0 };
+  window.__app = state; // handy for debugging and for the automated tests
+
+  const setStatus = (text) => { $("status").textContent = text; };
+  const setState = (s) => { document.body.dataset.state = s; };
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  const api = PyApi.create({ ...cfg, onStatus: setStatus });
+  state.api = api;
+
+  /* ---------------- controls built from Python's describe() ---------------- */
+  const GROUPS = { economy: "Economy", phillips: "Phillips curve", initial: "Initial state", numerics: "Numerics" };
+  const decimals = (step) => Math.max(0, (String(step).split(".")[1] || "").length);
+
+  const esc = (x) => String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* keep = true keeps the current slider values where the parameter still exists (after a code edit),
+     except for parameters listed in `reset`, whose definition changed in the code: those take the new default. */
+  function buildControls(meta, keep = false, reset = new Set()) {
+    const root = $("controls");
+    root.innerHTML = "";
+    const previous = state.params;
+    state.params = {};
+    const byGroup = {};
+    meta.parameters.forEach((p) => (byGroup[p.group] = byGroup[p.group] || []).push(p));
+    Object.entries(byGroup).forEach(([g, list]) => {
+      const sec = document.createElement("section");
+      sec.className = "group";
+      sec.innerHTML = `<h2>${esc(GROUPS[g] || g)}</h2>`;
+      list.forEach((p) => {
+        const old = previous[p.name];
+        const value = keep && !reset.has(p.name) && typeof old === "number" && old >= p.min && old <= p.max
+          ? old : p.default;
+        state.params[p.name] = value;
+        const div = document.createElement("div");
+        div.className = "param" + (reset.has(p.name) ? " changed" : "");
+        div.dataset.name = p.name;
+        div.innerHTML = `
+          <label for="p-${esc(p.name)}"><span>${esc(p.label)}</span><output id="o-${esc(p.name)}"></output></label>
+          <input type="range" id="p-${esc(p.name)}" name="${esc(p.name)}"
+                 min="${Number(p.min)}" max="${Number(p.max)}" step="${Number(p.step)}" value="${Number(value)}">`;
+        sec.appendChild(div);
+        const input = div.querySelector("input");
+        const out = div.querySelector("output");
+        const show = () => (out.textContent = Number(input.value).toFixed(decimals(p.step)));
+        show();
+        input.addEventListener("input", () => {
+          div.classList.remove("changed");
+          state.params[p.name] = Number(input.value);
+          show();
+          schedule();
+        });
+      });
+      root.appendChild(sec);
+    });
+  }
+
+  function resetDefaults() {
+    state.meta.parameters.forEach((p) => {
+      const input = $("p-" + p.name);
+      input.value = p.default;
+      input.dispatchEvent(new Event("input"));
+    });
+  }
+
+  /* ------------------------------- charts ------------------------------- */
+  let tsChart, phaseChart;
+  function makeCharts() {
+    Chart.defaults.font.family = '"IBM Plex Sans", system-ui, sans-serif';
+    Chart.defaults.color = css("--muted");
+    Chart.defaults.borderColor = css("--line");
+    const base = {
+      animation: false, responsive: true, maintainAspectRatio: false, parsing: false,
+      interaction: { mode: "nearest", intersect: false },
+      plugins: { legend: { labels: { boxWidth: 14, boxHeight: 2 } } },
+      elements: { point: { radius: 0 }, line: { borderWidth: 2 } },
+    };
+    tsChart = new Chart($("ts-chart"), {
+      type: "line",
+      data: { datasets: [
+        { label: "u  wage share", data: [], borderColor: css("--u") },
+        { label: "v  employment", data: [], borderColor: css("--v") },
+        { label: "u*", data: [], borderColor: css("--u"), borderDash: [5, 4], borderWidth: 1 },
+        { label: "v*", data: [], borderColor: css("--v"), borderDash: [5, 4], borderWidth: 1 },
+      ] },
+      options: { ...base, scales: {
+        x: { type: "linear", title: { display: true, text: "t (years)" } },
+        y: { title: { display: true, text: "share / rate" } },
+      } },
+    });
+    phaseChart = new Chart($("phase-chart"), {
+      type: "scatter",
+      data: { datasets: [
+        { label: "orbit", data: [], showLine: true, borderColor: css("--accent"), pointRadius: 0 },
+        { label: "equilibrium (v*, u*)", data: [], pointRadius: 5, pointStyle: "crossRot", borderColor: css("--ink"), borderWidth: 2 },
+        { label: "start", data: [], pointRadius: 4, backgroundColor: css("--u"), borderColor: css("--u") },
+      ] },
+      // parsing stays on here: the orbit is not sorted by x, and Chart.js only scans
+      // the full data range for unsorted data when it parses it.
+      options: { ...base, parsing: true, scales: {
+        x: { type: "linear", title: { display: true, text: "v  employment rate" } },
+        y: { type: "linear", title: { display: true, text: "u  wage share" } },
+      } },
+    });
+  }
+
+  function render(res) {
+    const { t, u, v, equilibrium: eq, summary: s } = res;
+    const t0 = t[0], t1 = t[t.length - 1];
+    tsChart.data.datasets[0].data = t.map((x, i) => ({ x, y: u[i] }));
+    tsChart.data.datasets[1].data = t.map((x, i) => ({ x, y: v[i] }));
+    tsChart.data.datasets[2].data = [{ x: t0, y: eq.u_star }, { x: t1, y: eq.u_star }];
+    tsChart.data.datasets[3].data = [{ x: t0, y: eq.v_star }, { x: t1, y: eq.v_star }];
+    tsChart.update();
+    phaseChart.data.datasets[0].data = v.map((x, i) => ({ x, y: u[i] }));
+    phaseChart.data.datasets[1].data = [{ x: eq.v_star, y: eq.u_star }];
+    phaseChart.data.datasets[2].data = [{ x: v[0], y: u[0] }];
+    phaseChart.update();
+
+    const f = (x, d = 3) => (x === null || x === undefined ? "—" : Number(x).toFixed(d));
+    const items = [
+      ["u*  (eq. wage share)", f(eq.u_star)],
+      ["v*  (eq. employment)", f(eq.v_star)],
+      ["Cycle period", s.period ? f(s.period, 2) + " y" : "—"],
+      ["u range", `${f(s.u_min)}–${f(s.u_max)}`],
+      ["v range", `${f(s.v_min)}–${f(s.v_max)}`],
+      ["Invariant drift", Number(s.invariant_drift).toExponential(1)],
+    ];
+    $("stats").innerHTML = items
+      .map(([k, val]) => `<div class="stat"><div class="k">${k}</div><div class="val">${val}</div></div>`)
+      .join("");
+
+    const w = $("warnings");
+    w.hidden = !res.warnings.length;
+    w.textContent = res.warnings.join(" ");
+  }
+
+  /* -------------------------- run loop (debounced) -------------------------- */
+  let timer = null;
+  function schedule() {
+    clearTimeout(timer);
+    timer = setTimeout(run, 80);
+  }
+
+  const run_ = () => run();
+  async function run() {
+    if (state.running) { state.dirty = true; return; }
+    state.running = true;
+    const params = { ...state.params };
+    const t0 = performance.now();
+    try {
+      const res = await api.call("simulate", params);
+      const ms = performance.now() - t0;
+      state.last = res;
+      state.runs++;
+      render(res);
+      setState("ready");
+      setStatus(`${res.summary.steps.toLocaleString()} RK4 steps · ${ms.toFixed(0)} ms round-trip · ${api.info.runtime}`);
+    } catch (e) {
+      state.lastError = { type: e.pyType, message: e.message, line: e.line };
+      setState("error");
+      setStatus(`${e.pyType || "Error"}: ${e.message}${e.line ? ` (line ${e.line})` : ""}`);
+      if (e.line) markErrorLine(e.line);
+    } finally {
+      state.running = false;
+      if (state.dirty) { state.dirty = false; run(); }
+    }
+  }
+
+  /* ----------------------------- Python editor ----------------------------- */
+  const APP_VERSION = "1.1.0";
+  let editor = null;
+  let original = "";
+  let errorLine = null;
+
+  function codeStatus(text, kind = "") {
+    const el = $("code-status");
+    el.textContent = text;
+    el.className = "code-status" + (kind ? " " + kind : "");
+  }
+
+  function markErrorLine(line) {
+    if (!editor) return;
+    clearErrorLine();
+    errorLine = editor.addLineClass(line - 1, "background", "cm-error-line");
+    if ($("code").open) editor.scrollIntoView({ line: line - 1, ch: 0 }, 80);
+  }
+  function clearErrorLine() {
+    if (editor && errorLine) editor.removeLineClass(errorLine, "background", "cm-error-line");
+    errorLine = null;
+  }
+
+  /* Parameters whose definition (default, range, step, label) differs between two describe() results. */
+  function changedParams(before, after) {
+    const old = Object.fromEntries(((before && before.parameters) || []).map((p) => [p.name, p]));
+    return after.parameters.filter((p) => {
+      const o = old[p.name];
+      return !o || ["default", "min", "max", "step", "label", "group"].some((k) => o[k] !== p[k]);
+    });
+  }
+
+  /* Run now, even if a run is in flight: wait for it, then run with the current parameters. */
+  async function runNow() {
+    while (state.running) await new Promise((r) => setTimeout(r, 20));
+    await run();
+  }
+
+  function flash(selector) {
+    document.querySelectorAll(selector).forEach((el) => {
+      el.classList.remove("flash");
+      void el.offsetWidth; // restart the animation
+      el.classList.add("flash");
+    });
+  }
+
+  async function applyCode(source) {
+    const run = $("code-run");
+    run.disabled = true;
+    codeStatus("Reloading module in Pyodide…");
+    try {
+      const out = await api.reload(source);
+      clearErrorLine();
+      const before = state.last;
+      const prevMeta = state.meta;
+      state.meta = await api.call("describe");
+      const changed = changedParams(prevMeta, state.meta);
+      buildControls(state.meta, true, new Set(changed.map((p) => p.name)));
+      state.codeVersion = (state.codeVersion || 0) + 1;
+      await runNow();
+      if (document.body.dataset.state === "error") {
+        codeStatus(`Module v${state.codeVersion} loaded, but the run failed: ${state.lastError.type}: ${state.lastError.message}`, "err");
+        return;
+      }
+      flash(".chart, .stat");
+      const parts = [`Module reloaded (v${state.codeVersion}), charts recomputed`];
+      if (changed.length) {
+        const old = Object.fromEntries(((prevMeta && prevMeta.parameters) || []).map((p) => [p.name, p]));
+        parts.push("parameters updated: " + changed.map((p) => {
+          const o = old[p.name];
+          return o && o.default !== p.default ? `${p.name} ${o.default} → ${p.default}` : p.name;
+        }).join(", "));
+      }
+      parts.push(describeEffect(before, state.last));
+      codeStatus(parts.join(" · "), "ok");
+      $("code-status").dataset.changed = changed.map((p) => p.name).join(",");
+    } catch (e) {
+      codeStatus(`${e.pyType}: ${e.message}${e.line ? ` — line ${e.line}` : ""} · the previous version is still running`, "err");
+      if (e.line) markErrorLine(e.line);
+    } finally {
+      run.disabled = false;
+    }
+  }
+
+  /* One-line summary of how the result moved, so a code change is visible next to the editor. */
+  function describeEffect(before, after) {
+    if (!before || !after) return "";
+    const f = (x, d = 3) => (x == null ? "—" : Number(x).toFixed(d));
+    const diffs = [];
+    const pairs = [
+      ["u*", before.equilibrium.u_star, after.equilibrium.u_star, 3],
+      ["v*", before.equilibrium.v_star, after.equilibrium.v_star, 3],
+      ["period", before.summary.period, after.summary.period, 2],
+      ["u max", before.summary.u_max, after.summary.u_max, 3],
+      ["v max", before.summary.v_max, after.summary.v_max, 3],
+    ];
+    for (const [k, a, b, d] of pairs) if (f(a, d) !== f(b, d)) diffs.push(`${k} ${f(a, d)} → ${f(b, d)}`);
+    return diffs.length ? diffs.join(", ") : "results unchanged by this edit";
+  }
+
+  async function setupEditor() {
+    const editable = api.editable;
+    const pill = $("code-mode");
+    pill.textContent = editable ? "editable · runs in your browser" : "read-only · runs on the server";
+    pill.className = "pill " + (editable ? "editable" : "readonly");
+    $("code-note").textContent = editable
+      ? "This is the exact module Pyodide is running. Edit it and press Run changes (Ctrl/⌘ + Enter) to hot-reload it; the charts update immediately. Edits live in this tab only."
+      : "This is the module the server is running, shown read-only. To change it, edit core/goodwin.py and redeploy the server.";
+    $("code-buttons").hidden = !editable;
+    $("code-file").textContent = `core/${cfg.moduleName || "goodwin"}.py`;
+
+    let source = "";
+    try {
+      source = (await api.getSource()).source;
+    } catch (e) {
+      codeStatus(`Could not load the source: ${e.message}`, "err");
+    }
+    original = source;
+
+    if (typeof CodeMirror !== "function") {
+      // Editor library unavailable: fall back to a plain textarea.
+      const ta = $("code-editor");
+      ta.value = source;
+      ta.readOnly = !editable;
+      ta.style.cssText = "width:100%;height:420px;font:13px/1.6 var(--mono);border:0;padding:10px;background:var(--code-bg);color:var(--code-ink);resize:vertical";
+      editor = {
+        getValue: () => ta.value, setValue: (v) => (ta.value = v),
+        addLineClass: () => null, removeLineClass: () => {}, refresh: () => {}, scrollIntoView: () => {},
+        getOption: (k) => (k === "readOnly" ? ta.readOnly : undefined),
+      };
+    } else {
+      editor = CodeMirror.fromTextArea($("code-editor"), {
+        value: source,
+        mode: { name: "python", version: 3, singleLineStringErrors: false },
+        theme: "goodwin" + (editable ? "" : " readonly"),
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        smartIndent: true,
+        electricChars: true,
+        matchBrackets: true,
+        styleActiveLine: true,
+        lineWrapping: false,
+        readOnly: editable ? false : true,
+        viewportMargin: 50,
+        extraKeys: {
+          Tab: (cm) => (cm.somethingSelected() ? cm.indentSelection("add") : cm.replaceSelection(" ".repeat(cm.getOption("indentUnit")))),
+          "Shift-Tab": (cm) => cm.indentSelection("subtract"),
+          "Ctrl-Enter": () => editable && applyCode(editor.getValue()),
+          "Cmd-Enter": () => editable && applyCode(editor.getValue()),
+        },
+      });
+      editor.setValue(source);
+      editor.clearHistory();
+      editor.on("change", () => {
+        if (editable) codeStatus(editor.getValue() === original ? "" : "Unsaved changes · Run changes to apply", "dirty");
+      });
+    }
+    state.editor = editor;
+
+    $("code").addEventListener("toggle", () => { if ($("code").open) editor.refresh(); });
+    $("code-run").addEventListener("click", () => applyCode(editor.getValue()));
+    $("code-revert").addEventListener("click", () => {
+      editor.setValue(original);
+      applyCode(original);
+    });
+    if (source) codeStatus(editable ? "" : `${source.split("\n").length} lines · served by the API`);
+  }
+
+  /* ------------------------------- tech info ------------------------------- */
+  const row = (name, role, value) =>
+    `<tr><td>${esc(name)}${role ? `<span class="role">${esc(role)}</span>` : ""}</td>` +
+    `<td>${value == null || value === "" ? '<span class="na">not loaded</span>' : esc(value)}</td></tr>`;
+
+  function browserName() {
+    const ua = navigator.userAgent;
+    const m = ua.match(/(Edg|OPR|Chrome|Firefox|Version)\/([\d.]+)/g) || [];
+    const pick = m.find((x) => /^Edg|^OPR/.test(x)) || m.find((x) => /^Firefox/.test(x)) || m.find((x) => /^Chrome/.test(x)) || m[0];
+    return pick ? pick.replace("Edg", "Edge").replace("OPR", "Opera").replace("Version", "Safari").replace("/", " ") : ua;
+  }
+
+  async function openTech() {
+    const dlg = $("tech");
+    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+    const body = $("tech-body");
+    const front = [
+      row("Goodwin Cycle Lab", "this app", APP_VERSION),
+      row("Deployment mode", "where Python runs", cfg.mode === "server" ? "server (HTTP API)" : "browser (WebAssembly)"),
+      row("Chart.js", "charts", window.Chart && Chart.version),
+      row("CodeMirror", "code editor", window.CodeMirror && CodeMirror.version),
+      row("IBM Plex Sans / Mono", "typefaces", "Google Fonts"),
+      row("Browser", "detected", browserName()),
+      row("Web Worker", "Python off the UI thread", typeof Worker !== "undefined" ? (api.info.runtime.includes("Worker") ? "in use (ES module worker)" : "available, not used") : "unavailable"),
+      row("WebAssembly", "runtime support", typeof WebAssembly === "object" ? "supported" : "unsupported"),
+    ].join("");
+    body.innerHTML = `<h3>Front end · JavaScript</h3><table>${front}</table><h3>Python side</h3><p class="na">Asking the runtime…</p>`;
+    try {
+      const t = await api.techInfo();
+      let back;
+      if (t.location === "browser") {
+        back = [
+          row("Runs in", "", "your browser, inside a Web Worker"),
+          row("Pyodide", "CPython → WebAssembly", t.pyodide),
+          row("Python", t.implementation, t.python),
+          row("Emscripten", "compiler toolchain", t.emscripten),
+          row("Platform", "sys.platform", t.platform),
+          row("Module", "public functions", `${t.module}.py · ${t.functions.join(", ")}`),
+          row("Extra Python packages", "", "none (pure standard library)"),
+        ];
+      } else {
+        const pk = t.packages || {};
+        back = [
+          row("Runs on", "", "server, via HTTP"),
+          row("Python", t.implementation, t.python),
+          row("FastAPI", "web framework", pk.fastapi),
+          row("Starlette", "ASGI toolkit", pk.starlette),
+          row("Pydantic", "validation", pk.pydantic),
+          row("Uvicorn", "ASGI server", pk.uvicorn),
+          row("AnyIO", "async I/O", pk.anyio),
+          row("Platform", "", t.platform),
+          row("Module", "public functions", `${t.module}.py · ${t.functions.join(", ")}`),
+        ];
+      }
+      body.innerHTML = body.innerHTML.replace(/<h3>Python side<\/h3>[\s\S]*$/, "") +
+        `<h3>Python side · ${t.location === "browser" ? "in the browser" : "back end"}</h3><table>${back.join("")}</table>`;
+    } catch (e) {
+      body.innerHTML = body.innerHTML.replace(/<p class="na">Asking the runtime…<\/p>/, `<p class="na">Unavailable: ${esc(e.message)}</p>`);
+    }
+  }
+  $("tech-open").addEventListener("click", openTech);
+  $("tech-close").addEventListener("click", () => $("tech").close ? $("tech").close() : $("tech").removeAttribute("open"));
+  $("tech").addEventListener("click", (ev) => { if (ev.target === $("tech")) $("tech").close(); });
+
+  /* --------------------------------- boot --------------------------------- */
+  (async function boot() {
+    makeCharts();
+    try {
+      await api.ready;
+      $("backend-text").textContent = `${api.info.kind} · ${api.info.runtime}`;
+      state.meta = await api.call("describe");
+      buildControls(state.meta);
+      $("reset").addEventListener("click", resetDefaults);
+      await run();
+      await setupEditor();
+    } catch (e) {
+      setState("error");
+      $("backend-text").textContent = `${cfg.mode} · unavailable`;
+      setStatus(`Startup failed — ${e.pyType || "Error"}: ${e.message}`);
+    }
+  })();
+})();
+
+</script>
+</body>
+</html>
