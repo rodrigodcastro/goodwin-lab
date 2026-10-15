@@ -442,7 +442,7 @@ body[data-state="error"] .status { color: var(--err-ink); background: var(--err-
 .muted { color: var(--muted); font-weight: 400; }
 .canvas-box { position: relative; height: 320px; }
 
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
 .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .stat .k { font-size: 12px; color: var(--muted); }
 .stat .val { font: 500 17px var(--mono); margin-top: 2px; }
@@ -585,6 +585,109 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .param.changed label span::after { content: " · updated"; color: var(--accent); font-size: 12px; }
 @media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
 
+/* ---------------- sensitivity (± deviations) ---------------- */
+:root {
+  --s1: #c2502b; --s2: #1f7a8c; --s3: #7b4fb8; --s4: #2f8f3a; --s5: #b07d10;
+  --s6: #c23a7a; --s7: #3b5fc4; --s8: #6d6a20; --s9: #0f8f80;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --s1: #ee7a52; --s2: #4fb3c6; --s3: #b28ff0; --s4: #6fcf72; --s5: #e8b64a;
+    --s6: #f07ab0; --s7: #7f9ff5; --s8: #c9c25a; --s9: #4fd1bf;
+  }
+}
+:root[data-theme="dark"] {
+  --s1: #ee7a52; --s2: #4fb3c6; --s3: #b28ff0; --s4: #6fcf72; --s5: #e8b64a;
+  --s6: #f07ab0; --s7: #7f9ff5; --s8: #c9c25a; --s9: #4fd1bf;
+}
+
+body.sens-on .layout { grid-template-columns: 340px 1fr; }
+.sens-box { display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.sens-hint { margin: 0; font-size: 12.5px; color: var(--muted); display: none; }
+body.sens-on .sens-hint { display: block; }
+#sens-clear { display: none; align-self: flex-start; }
+body.sens-on #sens-clear { display: inline-block; }
+button.small { font-size: 12.5px; padding: 4px 10px; }
+
+.switch { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch-ui {
+  position: relative; flex: none; width: 36px; height: 20px; border-radius: 999px;
+  background: var(--line); transition: background .15s;
+}
+.switch-ui::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s;
+}
+.switch input:checked + .switch-ui { background: var(--accent); }
+.switch input:checked + .switch-ui::after { transform: translateX(16px); }
+.switch input:focus-visible + .switch-ui { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.band-strip { position: relative; height: 0; margin: 0; transition: height .1s; }
+body.sens-on .band-strip.on { height: 10px; margin: 1px 0 3px; }
+.band-strip:not(.on) > * { display: none; }
+.band {
+  position: absolute; top: 2px; height: 6px; border-radius: 3px; min-width: 2px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  border: 1px solid var(--accent);
+}
+.band-mark {
+  position: absolute; top: 0; width: 2px; height: 10px; margin-left: -1px; border-radius: 1px; background: var(--ink);
+}
+.band.cap-low { border-left: 3px solid var(--err-ink); border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.band.cap-high { border-right: 3px solid var(--err-ink); border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+.dev { display: none; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px; font: 12px var(--mono); color: var(--muted); }
+body.sens-on .dev { display: flex; }
+.dev label { display: inline-flex; align-items: center; gap: 2px; }
+.dev input {
+  width: 52px; font: 12px var(--mono); padding: 2px 4px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink); text-align: right;
+}
+.dev input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dev-range { display: none; align-items: center; gap: 2px; white-space: nowrap; }
+body.sens-on .dev-range:not(:empty) { display: inline-flex; }
+.dev-range .dash { color: var(--muted); }
+
+.cap-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.seg { display: none; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font: 12px var(--mono); }
+body.sens-on .seg { display: inline-flex; }
+.seg label { padding: 2px 10px; cursor: pointer; color: var(--muted); }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg label:has(input:checked) { background: var(--accent); color: var(--panel); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.scenarios { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.scen-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.scen-head h2 { margin: 0; font-size: 13.5px; font-weight: 600; }
+.scen-count { font: 12px var(--mono); color: var(--muted); }
+.scen-note, .scen-empty { margin: 0; font-size: 12.5px; color: var(--muted); }
+.table-scroll { overflow-x: auto; }
+.scenarios table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.scenarios th { text-align: left; font-weight: 600; color: var(--muted); padding: 4px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.scenarios td { padding: 4px 8px; border-bottom: 1px solid var(--line); font-family: var(--mono); white-space: nowrap; }
+.scenarios td:nth-child(2) { font-family: inherit; }
+.scenarios tr.base td { font-weight: 600; }
+.scenarios tr.err td { color: var(--err-ink); }
+@media (max-width: 900px) { body.sens-on .layout { grid-template-columns: 1fr; } }
+
+/* slider scale: clickable min / max, band ends in the middle */
+.scale { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 1px; }
+.scale-mid { flex: 1; display: flex; justify-content: center; min-width: 0; }
+.end, .to-val, .chip {
+  font: 11.5px var(--mono); line-height: 1; padding: 3px 6px; border-radius: 6px; cursor: pointer;
+  border: 1px solid transparent; background: transparent; color: var(--muted);
+}
+.end:hover, .to-val:hover { border-color: var(--line); color: var(--accent); background: var(--bg); }
+.to-val { color: var(--accent); }
+.to-val.is-capped { color: var(--err-ink); }
+.to-val.is-capped::after { content: " ⇥"; }
+.chips { display: inline-flex; gap: 3px; margin-left: auto; }
+.chip { border-color: var(--line); background: var(--bg); padding: 3px 5px; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.end:focus-visible, .to-val:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 </style>
 </head>
 <body data-state="loading">
@@ -606,6 +709,15 @@ button:disabled { opacity: 0.55; cursor: progress; }
 
   <main class="layout">
     <aside class="panel controls" aria-label="Parameters">
+      <div class="sens-box">
+        <label class="switch" for="sens-on">
+          <input type="checkbox" id="sens-on" role="switch">
+          <span class="switch-ui" aria-hidden="true"></span>
+          <span class="switch-text">Sensitivity · ± deviations</span>
+        </label>
+        <p class="sens-hint">Set a % below and above each value. Each non-zero deviation runs its own simulation, one parameter at a time.</p>
+        <button id="sens-clear" type="button" class="small">Set all to 0%</button>
+      </div>
       <div id="controls"></div>
       <div class="actions">
         <button id="reset" type="button">Reset defaults</button>
@@ -618,7 +730,13 @@ button:disabled { opacity: 0.55; cursor: progress; }
 
       <div class="charts">
         <figure class="panel chart">
-          <figcaption>Time series</figcaption>
+          <figcaption class="cap-row">
+            <span>Time series</span>
+            <span class="seg" role="radiogroup" aria-label="Variable shown for scenarios">
+              <label><input type="radio" name="ts-var" value="u" checked> u</label>
+              <label><input type="radio" name="ts-var" value="v"> v</label>
+            </span>
+          </figcaption>
           <div class="canvas-box"><canvas id="ts-chart" aria-label="Wage share and employment over time"></canvas></div>
         </figure>
         <figure class="panel chart">
@@ -628,6 +746,12 @@ button:disabled { opacity: 0.55; cursor: progress; }
       </div>
 
       <div class="stats" id="stats"></div>
+
+      <section class="panel scenarios" id="scenarios" hidden aria-label="Sensitivity scenarios">
+        <div class="scen-head"><h2>Sensitivity scenarios</h2><span class="scen-count"></span></div>
+        <p class="scen-note">One parameter moved at a time; the others stay at the slider values. Dashed = lower deviation, solid = upper.</p>
+        <div class="scen-body"></div>
+      </section>
 
       <details class="panel model">
         <summary>Model &amp; architecture</summary>
@@ -680,9 +804,12 @@ button:disabled { opacity: 0.55; cursor: progress; }
       window.APP_CONFIG = {
         mode: apiBase ? "server" : "browser",
         baseUrl: apiBase || "",
-        moduleName: "goodwin",
-        pythonSource: "\"\"\"\nGoodwin (1967) growth-cycle model \u2014 pure Python, no dependencies.\n\nThis module is the \"Python block\" of the app. It is deliberately free of any\nbrowser or server code, so the very same file runs:\n  * inside the browser (Pyodide, loaded by web/py-runtime.js), and\n  * on a server (imported by server/main.py with FastAPI).\n\nContract: every public function takes JSON-friendly keyword arguments and\nreturns JSON-friendly values (dict / list / float / str). Invalid input raises\nValueError, which both transports turn into an error message for the UI.\n\nModel (u = wage share, v = employment rate):\n    du/dt = u * (phi(v) - alpha)            phi(v) = -gamma + rho * v\n    dv/dt = v * ((1 - u) / sigma - alpha - beta)\n\n    alpha : labour-productivity growth rate\n    beta  : labour-force growth rate\n    sigma : capital-output ratio\n    gamma, rho : linear Phillips curve (wage growth vs. employment)\n\nInterior equilibrium:  v* = (alpha + gamma) / rho,  u* = 1 - sigma (alpha + beta)\nThe system is Lotka-Volterra-like and conserves\n    H(u, v) = u/sigma - a ln u + rho v - c ln v,  a = 1/sigma - alpha - beta, c = alpha + gamma\nso orbits are closed cycles; the drift of H measures numerical error.\n\"\"\"\n\nimport math\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\")\n\nMAX_STEPS = 200_000\nMAX_POINTS = 2_000\n\n_PARAMS = [\n    # name, label, default, min, max, step, group\n    (\"alpha\", \"Productivity growth \u03b1\", 0.02, 0.0, 0.10, 0.001, \"economy\"),\n    (\"beta\", \"Labour-force growth \u03b2\", 0.01, 0.0, 0.10, 0.001, \"economy\"),\n    (\"sigma\", \"Capital-output ratio \u03c3\", 3.0, 0.5, 8.0, 0.1, \"economy\"),\n    (\"gamma\", \"Phillips intercept \u03b3\", 0.4, 0.0, 2.0, 0.01, \"phillips\"),\n    (\"rho\", \"Phillips slope \u03c1\", 0.5, 0.05, 3.0, 0.01, \"phillips\"),\n    (\"u0\", \"Initial wage share u\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"v0\", \"Initial employment v\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"t_max\", \"Horizon (years)\", 100.0, 1.0, 500.0, 1.0, \"numerics\"),\n    (\"dt\", \"Step size (years)\", 0.05, 0.001, 1.0, 0.001, \"numerics\"),\n]\n\n\ndef describe():\n    \"\"\"Parameter metadata, so the UI can build its controls from Python.\"\"\"\n    return {\n        \"model\": \"Goodwin growth cycle\",\n        \"method\": \"Classical Runge-Kutta 4 (fixed step)\",\n        \"parameters\": [\n            {\"name\": n, \"label\": l, \"default\": d, \"min\": lo, \"max\": hi, \"step\": s, \"group\": g}\n            for n, l, d, lo, hi, s, g in _PARAMS\n        ],\n    }\n\n\ndef _defaults():\n    return {p[0]: p[2] for p in _PARAMS}\n\n\ndef _clean(params):\n    \"\"\"Merge with defaults, coerce to float and validate. Raises ValueError.\"\"\"\n    unknown = set(params) - set(_defaults())\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s): {', '.join(sorted(unknown))}\")\n    p = _defaults()\n    for k, val in params.items():\n        try:\n            x = float(val)\n        except (TypeError, ValueError):\n            raise ValueError(f\"Parameter '{k}' must be a number, got {val!r}\")\n        if not math.isfinite(x):\n            raise ValueError(f\"Parameter '{k}' must be finite\")\n        p[k] = x\n    for k in (\"sigma\", \"rho\", \"u0\", \"v0\", \"t_max\", \"dt\"):\n        if p[k] <= 0:\n            raise ValueError(f\"Parameter '{k}' must be > 0\")\n    for k in (\"alpha\", \"beta\", \"gamma\"):\n        if p[k] < 0:\n            raise ValueError(f\"Parameter '{k}' must be >= 0\")\n    if p[\"t_max\"] / p[\"dt\"] > MAX_STEPS:\n        raise ValueError(f\"Too many steps (t_max/dt > {MAX_STEPS}); increase dt or reduce t_max\")\n    return p\n\n\ndef _eq(p):\n    u_star = 1.0 - p[\"sigma\"] * (p[\"alpha\"] + p[\"beta\"])\n    v_star = (p[\"alpha\"] + p[\"gamma\"]) / p[\"rho\"]\n    return u_star, v_star\n\n\ndef equilibrium(**params):\n    \"\"\"Interior equilibrium and small-oscillation period.\"\"\"\n    p = _clean(params)\n    u_star, v_star = _eq(p)\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    period = 2.0 * math.pi / math.sqrt(a * c) if a > 0 and c > 0 else None\n    return {\n        \"u_star\": u_star,\n        \"v_star\": v_star,\n        \"interior\": u_star > 0 and v_star > 0,\n        \"linear_period\": period,\n    }\n\n\ndef _rhs(u, v, p):\n    du = u * (-p[\"gamma\"] + p[\"rho\"] * v - p[\"alpha\"])\n    dv = v * ((1.0 - u) / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"])\n    return du, dv\n\n\ndef _invariant(u, v, p):\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    return u / p[\"sigma\"] - a * math.log(u) + p[\"rho\"] * v - c * math.log(v)\n\n\ndef simulate(**params):\n    \"\"\"Integrate the model with RK4. Returns time series plus diagnostics.\"\"\"\n    p = _clean(params)\n    dt, n = p[\"dt\"], int(round(p[\"t_max\"] / p[\"dt\"]))\n    u, v = p[\"u0\"], p[\"v0\"]\n    stride = max(1, math.ceil((n + 1) / MAX_POINTS))\n\n    ts, us, vs = [0.0], [u], [v]\n    u_star, v_star = _eq(p)\n    crossings = []  # times u crosses u* upwards -> period estimate\n    h0 = _invariant(u, v, p)\n    h_drift = 0.0\n\n    for i in range(1, n + 1):\n        k1 = _rhs(u, v, p)\n        k2 = _rhs(u + 0.5 * dt * k1[0], v + 0.5 * dt * k1[1], p)\n        k3 = _rhs(u + 0.5 * dt * k2[0], v + 0.5 * dt * k2[1], p)\n        k4 = _rhs(u + dt * k3[0], v + dt * k3[1], p)\n        un = u + dt / 6.0 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0])\n        vn = v + dt / 6.0 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1])\n        if not (math.isfinite(un) and math.isfinite(vn)) or un <= 0 or vn <= 0:\n            raise ValueError(f\"Integration became unstable at t={i * dt:.3f}; try a smaller dt\")\n        if u < u_star <= un:\n            crossings.append((i - 1 + (u_star - u) / (un - u)) * dt)\n        u, v = un, vn\n        h_drift = max(h_drift, abs(_invariant(u, v, p) - h0))\n        if i % stride == 0 or i == n:\n            ts.append(i * dt)\n            us.append(u)\n            vs.append(v)\n\n    period = None\n    if len(crossings) >= 2:\n        period = (crossings[-1] - crossings[0]) / (len(crossings) - 1)\n\n    warnings = []\n    if max(vs) > 1.0:\n        warnings.append(\"Employment rate exceeds 100% on the orbit (v > 1).\")\n    if max(us) > 1.0:\n        warnings.append(\"Wage share exceeds 100% on the orbit (u > 1).\")\n    if u_star <= 0:\n        warnings.append(\"No interior equilibrium: u* \u2264 0 (\u03c3(\u03b1+\u03b2) \u2265 1).\")\n\n    return {\n        \"params\": p,\n        \"t\": ts,\n        \"u\": us,\n        \"v\": vs,\n        \"equilibrium\": {\"u_star\": u_star, \"v_star\": v_star},\n        \"summary\": {\n            \"steps\": n,\n            \"u_min\": min(us), \"u_max\": max(us),\n            \"v_min\": min(vs), \"v_max\": max(vs),\n            \"period\": period,\n            \"invariant_drift\": h_drift / abs(h0) if h0 else h_drift,\n        },\n        \"warnings\": warnings,\n    }\n",
-        workerSource: "/*\n * py-runtime.js \u2014 runs a Python module inside the browser with Pyodide (CPython on WebAssembly).\n *\n * The same file works in two places:\n *   1. As a module Web Worker script (preferred: Python runs off the UI thread).\n *   2. As a plain <script> on the main thread (fallback when Workers are unavailable,\n *      e.g. some sandboxed iframes). It then just defines createPyRuntime().\n *\n * It knows nothing about the Goodwin model: it loads whatever module source it is given\n * and dispatches calls to that module's public functions, passing JSON in and out \u2014\n * exactly the same contract the HTTP server uses later.\n */\n\n/* eslint-disable no-restricted-globals */\n\n/* Python-side host code: imports the module, dispatches calls, and supports live reload. */\nconst HOST_PY = String.raw`\nimport sys, json, importlib, traceback, platform\nsys.dont_write_bytecode = True          # never reuse a stale .pyc after an edit\nif \"/app\" not in sys.path:\n    sys.path.insert(0, \"/app\")\n\ndef _public(mod):\n    return set(getattr(mod, \"PUBLIC_FUNCTIONS\",\n                       [n for n in dir(mod) if not n.startswith(\"_\") and callable(getattr(mod, n))]))\n\ndef _import():\n    importlib.invalidate_caches()\n    sys.modules.pop(_NAME, None)\n    return importlib.import_module(_NAME)\n\ndef _boot(name):\n    global _NAME, _PATH, _mod, _allowed\n    _NAME, _PATH = name, f\"/app/{name}.py\"\n    _mod = _import()\n    _allowed = _public(_mod)\n\ndef _dispatch(fn, args_json):\n    if fn not in _allowed:\n        raise LookupError(f\"Unknown function: {fn}\")\n    return json.dumps(getattr(_mod, fn)(**json.loads(args_json)), allow_nan=False)\n\ndef _error_line(e):\n    line = getattr(e, \"lineno\", None) if isinstance(e, SyntaxError) else None\n    if line is None:\n        frames = [f for f in traceback.extract_tb(e.__traceback__) if f.filename == _PATH]\n        line = frames[-1].lineno if frames else None\n    return line\n\ndef _reload(source):\n    \"\"\"Swap in new module source. On any error keep the previous, working module.\"\"\"\n    global _mod, _allowed\n    with open(_PATH) as f:\n        old = f.read()\n    with open(_PATH, \"w\") as f:\n        f.write(source)\n    try:\n        mod = _import()\n        allowed = _public(mod)\n        if not allowed:\n            raise ValueError(\"The module exposes no public functions\")\n    except BaseException as e:\n        with open(_PATH, \"w\") as f:\n            f.write(old)\n        sys.modules[_NAME] = _mod\n        return json.dumps({\"ok\": False, \"error\": {\"type\": type(e).__name__, \"message\": str(e), \"line\": _error_line(e)}})\n    _mod, _allowed = mod, allowed\n    return json.dumps({\"ok\": True, \"functions\": sorted(allowed)})\n\ndef _source():\n    with open(_PATH) as f:\n        return f.read()\n\ndef _info():\n    emsc = getattr(sys, \"_emscripten_info\", None)\n    return json.dumps({\n        \"python\": sys.version.split()[0],\n        \"implementation\": platform.python_implementation(),\n        \"platform\": sys.platform,\n        \"emscripten\": \".\".join(map(str, emsc.emscripten_version)) if emsc else None,\n        \"module\": _NAME,\n        \"functions\": sorted(_allowed),\n    })\n`;\n\nasync function createPyRuntime({ indexURL, options, moduleName, source, loadPyodideFn }) {\n  const py = await loadPyodideFn({ ...(options || {}), indexURL });\n  py.FS.mkdirTree(\"/app\");\n  py.FS.writeFile(`/app/${moduleName}.py`, source);\n  py.runPython(HOST_PY);\n  py.globals.get(\"_boot\")(moduleName);\n  const fns = Object.fromEntries([\"_dispatch\", \"_reload\", \"_source\", \"_info\"].map((n) => [n, py.globals.get(n)]));\n\n  // Internal operations use reserved \"__name__\" ids, which can never be module functions.\n  const internal = {\n    __reload__: (args) => {\n      const out = JSON.parse(fns._reload(String(args.source)));\n      if (!out.ok) throw Object.assign(new Error(out.error.message), { pyError: out.error });\n      return out;\n    },\n    __source__: () => ({ source: fns._source(), readonly: false }),\n    __info__: () => ({ ...JSON.parse(fns._info()), pyodide: py.version }),\n  };\n\n  return {\n    version: py.version,\n    call(fn, args) {\n      try {\n        if (internal[fn]) return { ok: true, result: internal[fn](args || {}) };\n        return { ok: true, result: JSON.parse(fns._dispatch(fn, JSON.stringify(args || {}))) };\n      } catch (e) {\n        return { ok: false, error: e.pyError || pythonErrorToObject(e, moduleName) };\n      }\n    },\n  };\n}\n\n/* Turn a Pyodide PythonError (full traceback) into { type, message, line } \u2014 the server's shape,\n   plus the line in the user's module where it failed (for the editor). */\nfunction pythonErrorToObject(e, moduleName) {\n  const text = String((e && e.message) || e);\n  const lines = text.trim().split(\"\\n\").filter(Boolean);\n  const last = lines[lines.length - 1] || text;\n  const m = last.match(/^([A-Za-z_][\\w.]*(?:Error|Exception|Warning|Interrupt|Exit)):\\s*(.*)$/);\n  const out = m ? { type: m[1].split(\".\").pop(), message: m[2] } : { type: \"Error\", message: last };\n  const re = new RegExp(`File \"/app/${moduleName}\\\\.py\", line (\\\\d+)`, \"g\");\n  let hit, line = null;\n  while ((hit = re.exec(text))) line = Number(hit[1]);\n  if (line) out.line = line;\n  return out;\n}\n\n/* ---------- Worker mode ---------- */\nif (typeof WorkerGlobalScope !== \"undefined\" && self instanceof WorkerGlobalScope) {\n  let runtime = null;\n  self.onmessage = async ({ data }) => {\n    if (data.type === \"init\") {\n      try {\n        // Current Pyodide ships as an ES module, so this must run as a module worker.\n        const { loadPyodide } = await import(data.indexURL + \"pyodide.mjs\");\n        runtime = await createPyRuntime({ ...data, loadPyodideFn: loadPyodide });\n        self.postMessage({ type: \"ready\", version: runtime.version });\n      } catch (e) {\n        self.postMessage({ type: \"init-error\", error: { type: \"InitError\", message: String(e && e.message || e) } });\n      }\n      return;\n    }\n    if (data.type === \"call\") {\n      const t0 = performance.now();\n      const out = runtime\n        ? runtime.call(data.fn, data.args)\n        : { ok: false, error: { type: \"InitError\", message: \"Python runtime not ready\" } };\n      self.postMessage({ type: \"result\", id: data.id, ms: performance.now() - t0, ...out });\n    }\n  };\n}\n",
+        pythonSources: {
+          "lab.py": "\"\"\"\nlab.py \u2014 the public face of the Python side. Both transports load THIS module:\nthe Pyodide worker in the browser and FastAPI on the server.\n\n    model        : goodwin.py      (the mathematical model, editable in the browser)\n    experiments  : experiments.py  (model-agnostic exercises: sensitivity, sweeps, ...)\n\nOnly the names in PUBLIC_FUNCTIONS can be called from the front end. Every function takes\nJSON-friendly keyword arguments and returns JSON-friendly values.\n\"\"\"\n\nimport experiments\nimport goodwin as model\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\", \"experiment_kinds\", \"run_experiment\")\n\n\ndef describe():\n    return model.describe()\n\n\ndef equilibrium(**params):\n    return model.equilibrium(**params)\n\n\ndef simulate(**params):\n    return model.simulate(**params)\n\n\ndef experiment_kinds():\n    return experiments.kinds()\n\n\ndef run_experiment(kind=\"deviation_oat\", base=None, spec=None):\n    return experiments.run(model, kind, base or {}, spec or {})\n","goodwin.py": "\"\"\"\nGoodwin (1967) growth-cycle model \u2014 pure Python, no dependencies.\n\nThis module is the \"Python block\" of the app. It is deliberately free of any\nbrowser or server code, so the very same file runs:\n  * inside the browser (Pyodide, loaded by web/py-runtime.js), and\n  * on a server (imported by server/main.py with FastAPI).\n\nContract: every public function takes JSON-friendly keyword arguments and\nreturns JSON-friendly values (dict / list / float / str). Invalid input raises\nValueError, which both transports turn into an error message for the UI.\n\nModel (u = wage share, v = employment rate):\n    du/dt = u * (phi(v) - alpha)            phi(v) = -gamma + rho * v\n    dv/dt = v * ((1 - u) / sigma - alpha - beta)\n\n    alpha : labour-productivity growth rate\n    beta  : labour-force growth rate\n    sigma : capital-output ratio\n    gamma, rho : linear Phillips curve (wage growth vs. employment)\n\nInterior equilibrium:  v* = (alpha + gamma) / rho,  u* = 1 - sigma (alpha + beta)\nThe system is Lotka-Volterra-like and conserves\n    H(u, v) = u/sigma - a ln u + rho v - c ln v,  a = 1/sigma - alpha - beta, c = alpha + gamma\nso orbits are closed cycles; the drift of H measures numerical error.\n\"\"\"\n\nimport math\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\")\n\nMAX_STEPS = 200_000\nMAX_POINTS = 2_000\n\n_PARAMS = [\n    # name, label, default, min, max, step, group\n    (\"alpha\", \"Productivity growth \u03b1\", 0.02, 0.0, 0.10, 0.001, \"economy\"),\n    (\"beta\", \"Labour-force growth \u03b2\", 0.01, 0.0, 0.10, 0.001, \"economy\"),\n    (\"sigma\", \"Capital-output ratio \u03c3\", 3.0, 0.5, 8.0, 0.1, \"economy\"),\n    (\"gamma\", \"Phillips intercept \u03b3\", 0.4, 0.0, 2.0, 0.01, \"phillips\"),\n    (\"rho\", \"Phillips slope \u03c1\", 0.5, 0.05, 3.0, 0.01, \"phillips\"),\n    (\"u0\", \"Initial wage share u\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"v0\", \"Initial employment v\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"t_max\", \"Horizon (years)\", 100.0, 1.0, 500.0, 1.0, \"numerics\"),\n    (\"dt\", \"Step size (years)\", 0.05, 0.001, 1.0, 0.001, \"numerics\"),\n]\n\n\ndef describe():\n    \"\"\"Parameter metadata, so the UI can build its controls from Python.\"\"\"\n    return {\n        \"model\": \"Goodwin growth cycle\",\n        \"method\": \"Classical Runge-Kutta 4 (fixed step)\",\n        \"parameters\": [\n            {\"name\": n, \"label\": l, \"default\": d, \"min\": lo, \"max\": hi, \"step\": s, \"group\": g}\n            for n, l, d, lo, hi, s, g in _PARAMS\n        ],\n    }\n\n\ndef _defaults():\n    return {p[0]: p[2] for p in _PARAMS}\n\n\ndef _clean(params):\n    \"\"\"Merge with defaults, coerce to float and validate. Raises ValueError.\"\"\"\n    unknown = set(params) - set(_defaults())\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s): {', '.join(sorted(unknown))}\")\n    p = _defaults()\n    for k, val in params.items():\n        try:\n            x = float(val)\n        except (TypeError, ValueError):\n            raise ValueError(f\"Parameter '{k}' must be a number, got {val!r}\")\n        if not math.isfinite(x):\n            raise ValueError(f\"Parameter '{k}' must be finite\")\n        p[k] = x\n    for k in (\"sigma\", \"rho\", \"u0\", \"v0\", \"t_max\", \"dt\"):\n        if p[k] <= 0:\n            raise ValueError(f\"Parameter '{k}' must be > 0\")\n    for k in (\"alpha\", \"beta\", \"gamma\"):\n        if p[k] < 0:\n            raise ValueError(f\"Parameter '{k}' must be >= 0\")\n    if p[\"t_max\"] / p[\"dt\"] > MAX_STEPS:\n        raise ValueError(f\"Too many steps (t_max/dt > {MAX_STEPS}); increase dt or reduce t_max\")\n    return p\n\n\ndef _eq(p):\n    u_star = 1.0 - p[\"sigma\"] * (p[\"alpha\"] + p[\"beta\"])\n    v_star = (p[\"alpha\"] + p[\"gamma\"]) / p[\"rho\"]\n    return u_star, v_star\n\n\ndef equilibrium(**params):\n    \"\"\"Interior equilibrium and small-oscillation period.\"\"\"\n    p = _clean(params)\n    u_star, v_star = _eq(p)\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    period = 2.0 * math.pi / math.sqrt(a * c) if a > 0 and c > 0 else None\n    return {\n        \"u_star\": u_star,\n        \"v_star\": v_star,\n        \"interior\": u_star > 0 and v_star > 0,\n        \"linear_period\": period,\n    }\n\n\ndef _rhs(u, v, p):\n    du = u * (-p[\"gamma\"] + p[\"rho\"] * v - p[\"alpha\"])\n    dv = v * ((1.0 - u) / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"])\n    return du, dv\n\n\ndef _invariant(u, v, p):\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    return u / p[\"sigma\"] - a * math.log(u) + p[\"rho\"] * v - c * math.log(v)\n\n\ndef simulate(**params):\n    \"\"\"Integrate the model with RK4. Returns time series plus diagnostics.\"\"\"\n    p = _clean(params)\n    dt, n = p[\"dt\"], int(round(p[\"t_max\"] / p[\"dt\"]))\n    u, v = p[\"u0\"], p[\"v0\"]\n    stride = max(1, math.ceil((n + 1) / MAX_POINTS))\n\n    ts, us, vs = [0.0], [u], [v]\n    u_star, v_star = _eq(p)\n    crossings = []  # times u crosses u* upwards -> period estimate\n    h0 = _invariant(u, v, p)\n    h_drift = 0.0\n\n    for i in range(1, n + 1):\n        k1 = _rhs(u, v, p)\n        k2 = _rhs(u + 0.5 * dt * k1[0], v + 0.5 * dt * k1[1], p)\n        k3 = _rhs(u + 0.5 * dt * k2[0], v + 0.5 * dt * k2[1], p)\n        k4 = _rhs(u + dt * k3[0], v + dt * k3[1], p)\n        un = u + dt / 6.0 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0])\n        vn = v + dt / 6.0 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1])\n        if not (math.isfinite(un) and math.isfinite(vn)) or un <= 0 or vn <= 0:\n            raise ValueError(f\"Integration became unstable at t={i * dt:.3f}; try a smaller dt\")\n        if u < u_star <= un:\n            crossings.append((i - 1 + (u_star - u) / (un - u)) * dt)\n        u, v = un, vn\n        h_drift = max(h_drift, abs(_invariant(u, v, p) - h0))\n        if i % stride == 0 or i == n:\n            ts.append(i * dt)\n            us.append(u)\n            vs.append(v)\n\n    period = None\n    if len(crossings) >= 2:\n        period = (crossings[-1] - crossings[0]) / (len(crossings) - 1)\n\n    warnings = []\n    if max(vs) > 1.0:\n        warnings.append(\"Employment rate exceeds 100% on the orbit (v > 1).\")\n    if max(us) > 1.0:\n        warnings.append(\"Wage share exceeds 100% on the orbit (u > 1).\")\n    if u_star <= 0:\n        warnings.append(\"No interior equilibrium: u* \u2264 0 (\u03c3(\u03b1+\u03b2) \u2265 1).\")\n\n    return {\n        \"params\": p,\n        \"t\": ts,\n        \"u\": us,\n        \"v\": vs,\n        \"equilibrium\": {\"u_star\": u_star, \"v_star\": v_star},\n        \"summary\": {\n            \"steps\": n,\n            \"u_min\": min(us), \"u_max\": max(us),\n            \"v_min\": min(vs), \"v_max\": max(vs),\n            \"period\": period,\n            \"invariant_drift\": h_drift / abs(h0) if h0 else h_drift,\n        },\n        \"warnings\": warnings,\n    }\n","experiments.py": "\"\"\"\nexperiments.py \u2014 model-agnostic engine for simulation exercises (sensitivity, sweeps, ...).\n\nIt never draws anything and knows nothing about the UI. It works with any model module that\noffers the same contract as goodwin.py:\n\n    model.describe()  -> {\"parameters\": [{\"name\", \"min\", \"max\", \"default\", ...}, ...]}\n    model.simulate(**params) -> {\"summary\": {...}, \"equilibrium\": {...}, ...}\n\nEach exercise kind is a function registered in EXPERIMENTS. All of them take\n(model, base, spec) and return a JSON-friendly dict with at least:\n\n    {\"kind\": str, \"base\": <simulate result>, \"scenarios\": [<scenario>, ...]}\n\nwhere every scenario is\n    {\"id\", \"label\", \"params\": {...}, \"changed\": {...}, \"result\": <simulate result> | None,\n     \"error\": {\"type\", \"message\"} | None, \"delta\": {metric: scenario - base}}\n\nAdding a new kind (grid search, Sobol, Monte Carlo...) = write one function and register it;\nthe transport (Pyodide worker or FastAPI) and the front end's generic rendering do not change.\n\"\"\"\n\nimport math\n\n# Summary metrics compared against the base run (keys of simulate()[\"summary\"] / [\"equilibrium\"]).\nMETRICS = (\n    (\"period\", \"summary\"),\n    (\"u_min\", \"summary\"),\n    (\"u_max\", \"summary\"),\n    (\"v_min\", \"summary\"),\n    (\"v_max\", \"summary\"),\n    (\"u_star\", \"equilibrium\"),\n    (\"v_star\", \"equilibrium\"),\n)\n\nMAX_SCENARIOS = 64\n\n\n# ----------------------------------------------------------------------------- helpers\ndef _limits(model):\n    return {p[\"name\"]: p for p in model.describe()[\"parameters\"]}\n\n\ndef _metric(result, name, where):\n    value = result.get(where, {}).get(name)\n    return value if isinstance(value, (int, float)) and math.isfinite(value) else None\n\n\ndef _delta(result, base):\n    out = {}\n    for name, where in METRICS:\n        a, b = _metric(result, name, where), _metric(base, name, where)\n        out[name] = None if a is None or b is None else a - b\n    return out\n\n\ndef _run(model, params):\n    \"\"\"Run one simulation, capturing model errors so one bad scenario does not sink the rest.\"\"\"\n    try:\n        return model.simulate(**params), None\n    except (ValueError, ZeroDivisionError, OverflowError, ArithmeticError) as e:\n        return None, {\"type\": type(e).__name__, \"message\": str(e)}\n\n\ndef _number(value, what):\n    try:\n        x = float(value)\n    except (TypeError, ValueError):\n        raise ValueError(f\"{what} must be a number, got {value!r}\")\n    if not math.isfinite(x):\n        raise ValueError(f\"{what} must be finite\")\n    return x\n\n\ndef deviation_bounds(value, down_pct, up_pct, lo, hi):\n    \"\"\"\n    Interval [value - down%, value + up%] (percentages of |value|), clamped to [lo, hi].\n    Returns (low, high, low_capped, high_capped).\n    \"\"\"\n    span = abs(value)\n    low_raw = value - span * down_pct / 100.0\n    high_raw = value + span * up_pct / 100.0\n    low, high = max(low_raw, lo), min(high_raw, hi)\n    return low, high, low_raw < lo, high_raw > hi\n\n\n# ------------------------------------------------------------------- experiment kinds\ndef deviation_oat(model, base, spec):\n    \"\"\"\n    Manual sensitivity: for each parameter with a non-zero deviation, run one simulation at\n    value\u00b7(1 \u2212 down%) and one at value\u00b7(1 + up%), changing ONE parameter at a time (OAT),\n    the others held at the base values. Bounds are clamped to the parameter's [min, max].\n\n    spec = {\"deviations\": {\"alpha\": {\"down\": 10, \"up\": 20}, ...}}   (percent, default 0)\n    \"\"\"\n    limits = _limits(model)\n    deviations = (spec or {}).get(\"deviations\") or {}\n    if not isinstance(deviations, dict):\n        raise ValueError(\"spec.deviations must be an object {param: {down, up}}\")\n    unknown = set(deviations) - set(limits)\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s) in deviations: {', '.join(sorted(unknown))}\")\n\n    base_params = {k: limits[k][\"default\"] for k in limits}\n    base_params.update({k: _number(v, f\"base value of '{k}'\") for k, v in (base or {}).items()})\n    base_result = model.simulate(**base_params)  # an invalid base is the caller's error\n\n    bounds, scenarios = {}, []\n    for name in limits:  # model order, so colours and rows are stable\n        dev = deviations.get(name) or {}\n        down = _number(dev.get(\"down\", 0), f\"down % of '{name}'\")\n        up = _number(dev.get(\"up\", 0), f\"up % of '{name}'\")\n        if down < 0 or up < 0:\n            raise ValueError(f\"Deviations of '{name}' must be >= 0\")\n        if down > 100:\n            raise ValueError(f\"Down deviation of '{name}' cannot exceed 100%\")\n        value = base_params[name]\n        low, high, low_cap, high_cap = deviation_bounds(value, down, up, limits[name][\"min\"], limits[name][\"max\"])\n        bounds[name] = {\"value\": value, \"down_pct\": down, \"up_pct\": up, \"low\": low, \"high\": high,\n                        \"low_capped\": low_cap, \"high_capped\": high_cap}\n        for side, pct, x, capped in ((\"low\", down, low, low_cap), (\"high\", up, high, high_cap)):\n            if pct == 0 or x == value:\n                continue\n            params = dict(base_params, **{name: x})\n            result, error = _run(model, params)\n            scenarios.append({\n                \"id\": f\"{name}:{side}\",\n                \"label\": f\"{name} {'\u2212' if side == 'low' else '+'}{pct:g}%\" + (\" (capped)\" if capped else \"\"),\n                \"group\": name,\n                \"side\": side,\n                \"pct\": pct,\n                \"capped\": capped,\n                \"params\": params,\n                \"changed\": {name: x},\n                \"result\": result,\n                \"error\": error,\n                \"delta\": _delta(result, base_result) if result else None,\n            })\n    if len(scenarios) > MAX_SCENARIOS:\n        raise ValueError(f\"Too many scenarios ({len(scenarios)} > {MAX_SCENARIOS})\")\n    return {\"kind\": \"deviation_oat\", \"base\": base_result, \"bounds\": bounds, \"scenarios\": scenarios,\n            \"metrics\": [m for m, _ in METRICS]}\n\n\n# ----------------------------------------------------------------------------- registry\nEXPERIMENTS = {\n    \"deviation_oat\": {\n        \"run\": deviation_oat,\n        \"title\": \"Manual \u00b1 deviations (one at a time)\",\n        \"description\": \"Each parameter is moved to its lower and upper deviation, one at a time.\",\n        \"spec\": {\"deviations\": {\"<param>\": {\"down\": \"percent >= 0, <= 100\", \"up\": \"percent >= 0\"}}},\n    },\n    # Future kinds plug in here, e.g. \"grid\", \"sobol\", \"monte_carlo\".\n}\n\n\ndef kinds():\n    return {k: {kk: vv for kk, vv in v.items() if kk != \"run\"} for k, v in EXPERIMENTS.items()}\n\n\ndef run(model, kind, base, spec):\n    if kind not in EXPERIMENTS:\n        raise ValueError(f\"Unknown experiment kind '{kind}'. Available: {', '.join(EXPERIMENTS)}\")\n    return EXPERIMENTS[kind][\"run\"](model, base, spec)\n"
+        },
+        entryModule: "lab",
+        editableFile: "goodwin.py",
+        workerSource: "/*\n * py-runtime.js \u2014 runs a Python module inside the browser with Pyodide (CPython on WebAssembly).\n *\n * The same file works in two places:\n *   1. As a module Web Worker script (preferred: Python runs off the UI thread).\n *   2. As a plain <script> on the main thread (fallback when Workers are unavailable,\n *      e.g. some sandboxed iframes). It then just defines createPyRuntime().\n *\n * It knows nothing about the Goodwin model: it writes the Python files it is given into a\n * virtual folder, imports the entry module and dispatches calls to its public functions,\n * passing JSON in and out \u2014 exactly the same contract the HTTP server uses later.\n */\n\n/* eslint-disable no-restricted-globals */\n\n/* Python-side host code: imports the entry module (which may import sibling modules),\n   dispatches calls, and hot-reloads the one editable file. */\nconst HOST_PY = String.raw`\nimport sys, json, importlib, traceback, platform\nsys.dont_write_bytecode = True          # never reuse a stale .pyc after an edit\nif \"/app\" not in sys.path:\n    sys.path.insert(0, \"/app\")\n\ndef _public(mod):\n    return set(getattr(mod, \"PUBLIC_FUNCTIONS\",\n                       [n for n in dir(mod) if not n.startswith(\"_\") and callable(getattr(mod, n))]))\n\ndef _import_all():\n    \"\"\"Fresh import of the entry module and every module shipped with it (cascade reload).\"\"\"\n    importlib.invalidate_caches()\n    for name in _MODULES:\n        sys.modules.pop(name, None)\n    return importlib.import_module(_ENTRY)\n\ndef _boot(entry, editable, modules_json):\n    global _ENTRY, _EDIT_PATH, _MODULES, _mod, _allowed\n    _ENTRY, _EDIT_PATH, _MODULES = entry, f\"/app/{editable}\", json.loads(modules_json)\n    _mod = _import_all()\n    _allowed = _public(_mod)\n\ndef _dispatch(fn, args_json):\n    if fn not in _allowed:\n        raise LookupError(f\"Unknown function: {fn}\")\n    return json.dumps(getattr(_mod, fn)(**json.loads(args_json)), allow_nan=False)\n\ndef _error_line(e):\n    line = getattr(e, \"lineno\", None) if isinstance(e, SyntaxError) and getattr(e, \"filename\", None) == _EDIT_PATH else None\n    if line is None:\n        frames = [f for f in traceback.extract_tb(e.__traceback__) if f.filename == _EDIT_PATH]\n        line = frames[-1].lineno if frames else None\n    return line\n\ndef _reload(source):\n    \"\"\"Swap in new source for the editable file. On any error keep the previous, working code.\"\"\"\n    global _mod, _allowed\n    with open(_EDIT_PATH) as f:\n        old = f.read()\n    with open(_EDIT_PATH, \"w\") as f:\n        f.write(source)\n    try:\n        mod = _import_all()\n        allowed = _public(mod)\n        if not allowed:\n            raise ValueError(\"The module exposes no public functions\")\n    except BaseException as e:\n        err = {\"type\": type(e).__name__, \"message\": str(e), \"line\": _error_line(e)}\n        with open(_EDIT_PATH, \"w\") as f:\n            f.write(old)\n        _mod = _import_all()\n        return json.dumps({\"ok\": False, \"error\": err})\n    _mod, _allowed = mod, allowed\n    return json.dumps({\"ok\": True, \"functions\": sorted(allowed)})\n\ndef _source():\n    with open(_EDIT_PATH) as f:\n        return f.read()\n\ndef _info():\n    emsc = getattr(sys, \"_emscripten_info\", None)\n    return json.dumps({\n        \"python\": sys.version.split()[0],\n        \"implementation\": platform.python_implementation(),\n        \"platform\": sys.platform,\n        \"emscripten\": \".\".join(map(str, emsc.emscripten_version)) if emsc else None,\n        \"module\": _ENTRY,\n        \"modules\": _MODULES,\n        \"functions\": sorted(_allowed),\n    })\n`;\n\n/* files: { \"lab.py\": source, \"goodwin.py\": source, ... }; entry: module to expose;\n   editable: the file the editor can change. A single moduleName/source pair also works. */\nasync function createPyRuntime({ indexURL, options, files, entry, editable, moduleName, source, loadPyodideFn }) {\n  if (!files) {\n    files = { [`${moduleName}.py`]: source };\n    entry = moduleName;\n    editable = `${moduleName}.py`;\n  }\n  const py = await loadPyodideFn({ ...(options || {}), indexURL });\n  py.FS.mkdirTree(\"/app\");\n  for (const [name, text] of Object.entries(files)) py.FS.writeFile(`/app/${name}`, text);\n  py.runPython(HOST_PY);\n  const modules = Object.keys(files).map((f) => f.replace(/\\.py$/, \"\"));\n  py.globals.get(\"_boot\")(entry, editable, JSON.stringify(modules));\n  const fns = Object.fromEntries([\"_dispatch\", \"_reload\", \"_source\", \"_info\"].map((n) => [n, py.globals.get(n)]));\n  const editableModule = editable.replace(/\\.py$/, \"\");\n\n  // Internal operations use reserved \"__name__\" ids, which can never be module functions.\n  const internal = {\n    __reload__: (args) => {\n      const out = JSON.parse(fns._reload(String(args.source)));\n      if (!out.ok) throw Object.assign(new Error(out.error.message), { pyError: out.error });\n      return out;\n    },\n    __source__: () => ({ source: fns._source(), readonly: false }),\n    __info__: () => ({ ...JSON.parse(fns._info()), pyodide: py.version }),\n  };\n\n  return {\n    version: py.version,\n    call(fn, args) {\n      try {\n        if (internal[fn]) return { ok: true, result: internal[fn](args || {}) };\n        return { ok: true, result: JSON.parse(fns._dispatch(fn, JSON.stringify(args || {}))) };\n      } catch (e) {\n        return { ok: false, error: e.pyError || pythonErrorToObject(e, editableModule) };\n      }\n    },\n  };\n}\n\n/* Turn a Pyodide PythonError (full traceback) into { type, message, line } \u2014 the server's shape,\n   plus the line in the user's module where it failed (for the editor). */\nfunction pythonErrorToObject(e, moduleName) {\n  const text = String((e && e.message) || e);\n  const lines = text.trim().split(\"\\n\").filter(Boolean);\n  const last = lines[lines.length - 1] || text;\n  const m = last.match(/^([A-Za-z_][\\w.]*(?:Error|Exception|Warning|Interrupt|Exit)):\\s*(.*)$/);\n  const out = m ? { type: m[1].split(\".\").pop(), message: m[2] } : { type: \"Error\", message: last };\n  const re = new RegExp(`File \"/app/${moduleName}\\\\.py\", line (\\\\d+)`, \"g\");\n  let hit, line = null;\n  while ((hit = re.exec(text))) line = Number(hit[1]);\n  if (line) out.line = line;\n  return out;\n}\n\n/* ---------- Worker mode ---------- */\nif (typeof WorkerGlobalScope !== \"undefined\" && self instanceof WorkerGlobalScope) {\n  let runtime = null;\n  self.onmessage = async ({ data }) => {\n    if (data.type === \"init\") {\n      try {\n        // Current Pyodide ships as an ES module, so this must run as a module worker.\n        const { loadPyodide } = await import(data.indexURL + \"pyodide.mjs\");\n        runtime = await createPyRuntime({ ...data, loadPyodideFn: loadPyodide });\n        self.postMessage({ type: \"ready\", version: runtime.version });\n      } catch (e) {\n        self.postMessage({ type: \"init-error\", error: { type: \"InitError\", message: String(e && e.message || e) } });\n      }\n      return;\n    }\n    if (data.type === \"call\") {\n      const t0 = performance.now();\n      const out = runtime\n        ? runtime.call(data.fn, data.args)\n        : { ok: false, error: { type: \"InitError\", message: \"Python runtime not ready\" } };\n      self.postMessage({ type: \"result\", id: data.id, ms: performance.now() - t0, ...out });\n    }\n  };\n}\n",
       };
     })();
   </script>
@@ -730,11 +857,24 @@ button:disabled { opacity: 0.55; cursor: progress; }
     let pyodideOptions = {};
     let info = { kind: "browser", runtime: "?" };
 
-    async function getSource() {
-      if (cfg.pythonSource) return cfg.pythonSource;
-      const r = await fetch(cfg.pythonUrl);
-      if (!r.ok) throw new Error(`Could not load ${cfg.pythonUrl} (HTTP ${r.status})`);
-      return r.text();
+    /* The Python files to load: embedded sources (standalone build) or URLs to fetch.
+       Returns { files: {name: text}, entry, editable }. */
+    async function getFiles() {
+      if (cfg.pythonSources) {
+        return { files: cfg.pythonSources, entry: cfg.entryModule, editable: cfg.editableFile };
+      }
+      if (cfg.pythonFiles) {
+        const files = {};
+        await Promise.all(Object.entries(cfg.pythonFiles).map(async ([name, url]) => {
+          const r = await fetch(url);
+          if (!r.ok) throw new Error(`Could not load ${url} (HTTP ${r.status})`);
+          files[name] = await r.text();
+        }));
+        return { files, entry: cfg.entryModule, editable: cfg.editableFile };
+      }
+      // single-module configuration
+      const text = cfg.pythonSource || await (await fetch(cfg.pythonUrl)).text();
+      return { files: { [`${cfg.moduleName}.py`]: text }, entry: cfg.moduleName, editable: `${cfg.moduleName}.py` };
     }
 
     /* Where the worker script can come from. An embedded worker (standalone build) is tried as a
@@ -747,7 +887,7 @@ button:disabled { opacity: 0.55; cursor: progress; }
       return urls;
     }
 
-    function startWorker(source, url) {
+    function startWorker(bundle, url) {
       return new Promise((resolve, reject) => {
         let worker;
         try {
@@ -780,7 +920,7 @@ button:disabled { opacity: 0.55; cursor: progress; }
             data.ok ? p.res(data.result) : p.rej(toError(data.error));
           }
         };
-        worker.postMessage({ type: "init", indexURL, options: pyodideOptions, moduleName: cfg.moduleName, source });
+        worker.postMessage({ type: "init", indexURL, options: pyodideOptions, ...bundle });
       });
     }
 
@@ -794,14 +934,14 @@ button:disabled { opacity: 0.55; cursor: progress; }
       });
     }
 
-    async function startMainThread(source) {
+    async function startMainThread(bundle) {
       if (typeof global.createPyRuntime !== "function") {
         if (cfg.workerSource) (0, eval)(cfg.workerSource); // defines createPyRuntime
         else await loadScript(cfg.workerUrl);
       }
       const { loadPyodide } = await import(indexURL + "pyodide.mjs");
       const rt = await global.createPyRuntime({
-        indexURL, options: pyodideOptions, moduleName: cfg.moduleName, source, loadPyodideFn: loadPyodide,
+        indexURL, options: pyodideOptions, ...bundle, loadPyodideFn: loadPyodide,
       });
       info = { kind: "browser", runtime: `Pyodide ${rt.version} · main thread` };
       return async (fn, args) => {
@@ -813,13 +953,13 @@ button:disabled { opacity: 0.55; cursor: progress; }
 
     const ready = (async () => {
       status("Downloading Python (Pyodide/WebAssembly)…");
-      const source = await getSource();
+      const bundle = await getFiles();
       // Optional extra loadPyodide() options (e.g. a self-hosted stdLibURL); may be a Promise.
       pyodideOptions = (await (cfg.pyodideOptions || global.PYODIDE_OPTIONS)) || {};
       if (cfg.useWorker !== false && typeof Worker !== "undefined") {
         for (const url of workerUrls()) {
           try {
-            callImpl = await startWorker(source, url);
+            callImpl = await startWorker(bundle, url);
             return;
           } catch (e) {
             console.warn("Worker unavailable (" + url.slice(0, 30) + "…):", e);
@@ -827,7 +967,7 @@ button:disabled { opacity: 0.55; cursor: progress; }
         }
         status("Starting Python on the main thread…");
       }
-      callImpl = await startMainThread(source);
+      callImpl = await startMainThread(bundle);
     })();
 
     async function call(fn, args) {
@@ -899,7 +1039,247 @@ button:disabled { opacity: 0.55; cursor: progress; }
 </script>
   <script>
 /*
- * app.js — UI only: parameter controls, charts, summary.
+ * experiments.js — front-end side of simulation exercises (UI only, no numerics).
+ *
+ * It keeps what the user asked for (which exercise, which % per parameter), turns it into a
+ * request for the Python experiment engine (core/experiments.py, via lab.run_experiment), and
+ * draws what comes back: the deviation band on each slider, one colour per scenario, and the
+ * scenario table. Bounds, clamping to [min, max] and every simulation are computed in Python.
+ *
+ * Adding a new exercise later (grid, Sobol…) means: a new `kind` in core/experiments.py, and
+ * here a new way to build its `spec` and to show its result. The transport stays the same.
+ */
+(function (global) {
+  "use strict";
+
+  const PALETTE_SIZE = 9;
+  const esc = (x) => String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  const CHIPS = [5, 10, 25, 50];   // symmetric ±% presets
+
+  function create({ onChange, setParam = () => {} }) {
+    const state = {
+      enabled: false,
+      kind: "deviation_oat",
+      deviations: {},     // { alpha: { down: 10, up: 20 }, ... } in percent
+      order: [],          // parameter order (gives every parameter a stable colour)
+      meta: {},           // parameter metadata by name (for number formatting)
+      variable: "u",      // which series the time chart shows for scenarios
+      last: null,         // last experiment result from Python
+    };
+
+    const dev = (name) => (state.deviations[name] = state.deviations[name] || { down: 0, up: 0 });
+    const digits = (name) => {
+      const step = (state.meta[name] && state.meta[name].step) || 0.01;
+      return Math.min(6, Math.max(0, (String(step).split(".")[1] || "").length) + 1);
+    };
+    const fmt = (name, x) => (x == null ? "—" : Number(x).toFixed(digits(name)));
+
+    /* ---------------------------------------------------------------- controls */
+    function setEnabled(on) {
+      state.enabled = !!on;
+      document.body.classList.toggle("sens-on", state.enabled);
+      if (!state.enabled) clear();
+      onChange();
+    }
+
+    function clearAll() {
+      Object.keys(state.deviations).forEach((k) => (state.deviations[k] = { down: 0, up: 0 }));
+      document.querySelectorAll(".dev input").forEach((el) => (el.value = 0));
+      Object.keys(state.deviations).forEach(markChips);
+      onChange();
+    }
+
+    /* Highlight the chip matching a symmetric deviation (down == up == chip). */
+    function markChips(name) {
+      const d = dev(name);
+      CHIPS.forEach((c) => {
+        const chip = document.getElementById(`chip-${name}-${c}`);
+        if (chip) chip.setAttribute("aria-pressed", String(d.down === c && d.up === c));
+      });
+    }
+
+    /* Called by app.js for every parameter row it builds. */
+    function attach(row, p, input) {
+      state.meta[p.name] = p;
+      if (!state.order.includes(p.name)) state.order.push(p.name);
+      const d = dev(p.name);
+
+      // the [low, high] band lives on its own strip right under the slider, aligned with the track
+      const strip = document.createElement("div");
+      strip.className = "band-strip";
+      strip.id = "bs-" + p.name;
+      strip.innerHTML = `<div class="band" id="bd-${esc(p.name)}"></div><div class="band-mark" id="bm-${esc(p.name)}"></div>`;
+      input.insertAdjacentElement("afterend", strip);
+
+      const box = document.createElement("div");
+      box.className = "dev";
+      box.innerHTML = `
+        <label title="Percent below the current value">−<input type="number" id="dn-${esc(p.name)}"
+          min="0" max="100" step="1" value="${d.down}" inputmode="decimal" aria-label="${esc(p.label)}: percent below">%</label>
+        <label title="Percent above the current value">+<input type="number" id="up-${esc(p.name)}"
+          min="0" max="1000" step="1" value="${d.up}" inputmode="decimal" aria-label="${esc(p.label)}: percent above">%</label>
+        <span class="chips" role="group" aria-label="${esc(p.label)}: symmetric deviation">
+          ${CHIPS.map((c) => `<button type="button" class="chip" data-pct="${c}" id="chip-${esc(p.name)}-${c}"
+            aria-pressed="false" title="Set −${c}% and +${c}%">±${c}</button>`).join("")}
+        </span>`;
+      row.appendChild(box);
+
+      // low – high of the band, shown between the slider's min and max; each end is clickable
+      const range = document.createElement("span");
+      range.className = "dev-range";
+      range.id = "rg-" + p.name;
+      (row.querySelector(".scale-mid") || box).appendChild(range);
+      range.addEventListener("click", (ev) => {
+        const btn = ev.target.closest("button[data-v]");
+        if (btn) setParam(p.name, Number(btn.dataset.v));
+      });
+
+      box.querySelectorAll(".chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const pct = Number(chip.dataset.pct);
+          state.deviations[p.name] = { down: pct, up: pct };
+          box.querySelector(`#dn-${CSS.escape(p.name)}`).value = pct;
+          box.querySelector(`#up-${CSS.escape(p.name)}`).value = pct;
+          markChips(p.name);
+          onChange();
+        });
+      });
+      markChips(p.name);
+
+      box.querySelectorAll("input").forEach((el) => {
+        el.addEventListener("input", () => {
+          let x = Number(el.value);
+          if (!Number.isFinite(x) || x < 0) x = 0;
+          if (x > Number(el.max)) x = Number(el.max);
+          dev(p.name)[el.id.startsWith("dn-") ? "down" : "up"] = x;
+          markChips(p.name);
+          onChange();
+        });
+        el.addEventListener("change", () => (el.value = dev(p.name)[el.id.startsWith("dn-") ? "down" : "up"]));
+      });
+    }
+
+    /* ----------------------------------------------------------------- request */
+    /* Returns the call to make instead of a plain simulate(), or null when the exercise is off. */
+    function request(baseParams) {
+      if (!state.enabled) return null;
+      const deviations = {};
+      for (const [k, d] of Object.entries(state.deviations)) {
+        if (k in baseParams && (d.down > 0 || d.up > 0)) deviations[k] = { down: d.down, up: d.up };
+      }
+      return { fn: "run_experiment", args: { kind: state.kind, base: baseParams, spec: { deviations } } };
+    }
+
+    /* --------------------------------------------------------------- rendering */
+    function colorFor(scenario) {
+      const g = Math.max(0, state.order.indexOf(scenario.group));
+      return {
+        color: css(`--s${(g % PALETTE_SIZE) + 1}`) || css("--accent"),
+        dash: scenario.side === "low" ? [6, 4] : [],
+      };
+    }
+
+    /* Draw each parameter's [low, high] band on its slider (positions from Python's bounds). */
+    function drawBands(bounds) {
+      for (const name of state.order) {
+        const strip = document.getElementById("bs-" + name);
+        const band = document.getElementById("bd-" + name);
+        const mark = document.getElementById("bm-" + name);
+        const label = document.getElementById("rg-" + name);
+        const p = state.meta[name];
+        const b = bounds && bounds[name];
+        if (!strip || !p) continue;
+        if (!b || b.high - b.low <= 0) {
+          strip.classList.remove("on");
+          if (label) label.textContent = "";
+          continue;
+        }
+        const span = p.max - p.min || 1;
+        const pos = (x) => `calc(8px + ${(x - p.min) / span} * (100% - 16px))`;
+        // the thumb centre travels between 8px from each edge of a native range input
+        band.style.left = pos(b.low);
+        band.style.width = `calc(${(b.high - b.low) / span} * (100% - 16px))`;
+        mark.style.left = pos(b.value);
+        band.classList.toggle("cap-low", !!b.low_capped);
+        band.classList.toggle("cap-high", !!b.high_capped);
+        strip.classList.add("on");
+        if (label) {
+          const end = (x, capped, side) =>
+            `<button type="button" class="to-val${capped ? " is-capped" : ""}" data-v="${x}" id="go-${esc(name)}-${side}"
+              title="Set ${esc(name)} to this value${capped ? " (capped at the range limit)" : ""}">${esc(fmt(name, x))}</button>`;
+          label.innerHTML = `${end(b.low, b.low_capped, "low")}<span class="dash">–</span>${end(b.high, b.high_capped, "high")}`;
+        }
+      }
+    }
+
+    function renderTable(result) {
+      const box = document.getElementById("scenarios");
+      if (!box) return;
+      const rows = (result && result.scenarios) || [];
+      box.hidden = !state.enabled;
+      if (!state.enabled) return;
+      const f = (x, d = 3) => (x == null ? "—" : Number(x).toFixed(d));
+      const sd = (x, d = 3) => (x == null ? "—" : (x > 0 ? "+" : x < 0 ? "−" : "±") + Math.abs(x).toFixed(d));
+      const base = result.base;
+      const swatch = (color, dash) =>
+        `<svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="${esc(color)}"
+          stroke-width="${dash ? 2 : 3}" ${dash ? 'stroke-dasharray="5 3"' : ""}/></svg>`;
+      const head = `<tr><th></th><th>Scenario</th><th>Value</th><th>Period</th><th>Δ period</th>
+        <th>u range</th><th>v range</th><th>Δ u*</th></tr>`;
+      const baseRow = `<tr class="base"><td>${swatch(css("--ink"), false)}</td><td>Base</td><td>—</td>
+        <td>${f(base.summary.period, 2)}</td><td>—</td>
+        <td>${f(base.summary.u_min)}–${f(base.summary.u_max)}</td><td>${f(base.summary.v_min)}–${f(base.summary.v_max)}</td><td>—</td></tr>`;
+      const body = rows.map((s) => {
+        const c = colorFor(s);
+        const name = Object.keys(s.changed)[0];
+        if (s.error) {
+          return `<tr class="err"><td>${swatch(c.color, c.dash.length)}</td><td>${esc(s.label)}</td>
+            <td>${esc(fmt(name, s.changed[name]))}</td><td colspan="5">${esc(s.error.type)}: ${esc(s.error.message)}</td></tr>`;
+        }
+        const r = s.result.summary, d = s.delta;
+        return `<tr><td>${swatch(c.color, c.dash.length)}</td><td>${esc(s.label)}</td>
+          <td>${esc(fmt(name, s.changed[name]))}</td><td>${f(r.period, 2)}</td><td>${sd(d.period, 2)}</td>
+          <td>${f(r.u_min)}–${f(r.u_max)}</td><td>${f(r.v_min)}–${f(r.v_max)}</td><td>${sd(d.u_star)}</td></tr>`;
+      }).join("");
+      const empty = rows.length ? "" :
+        `<p class="scen-empty">Set a % below or above any parameter to add scenarios. Each deviation runs its own simulation.</p>`;
+      box.querySelector(".scen-body").innerHTML =
+        `<div class="table-scroll"><table>${head}${baseRow}${body}</table></div>${empty}`;
+      box.querySelector(".scen-count").textContent = `${rows.length} scenario${rows.length === 1 ? "" : "s"}`;
+    }
+
+    function apply(result) {
+      state.last = result;
+      drawBands(result.bounds);
+      renderTable(result);
+    }
+
+    function clear() {
+      state.last = null;
+      drawBands(null);
+      const box = document.getElementById("scenarios");
+      if (box) box.hidden = true;
+    }
+
+    return {
+      state,
+      get enabled() { return state.enabled; },
+      get variable() { return state.variable; },
+      setVariable(v) { state.variable = v; },
+      setEnabled, clearAll, attach, request, apply, clear, colorFor,
+    };
+  }
+
+  global.Experiments = { create };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+  <script>
+/*
+ * app.js — UI only: parameter controls, charts, summary, editor, tech info.
+ * Simulation exercises (sensitivity) are delegated to experiments.js.
  * All numerics come from Python through api.js. This file never touches Pyodide or HTTP.
  */
 (function () {
@@ -915,6 +1295,9 @@ button:disabled { opacity: 0.55; cursor: progress; }
 
   const api = PyApi.create({ ...cfg, onStatus: setStatus });
   state.api = api;
+  // Simulation exercises (sensitivity ±%, later grid/Sobol): UI state only; Python computes.
+  const exp = Experiments.create({ onChange: () => schedule(), setParam: (n, x) => setParam(n, x) });
+  state.exp = exp;
 
   /* ---------------- controls built from Python's describe() ---------------- */
   const GROUPS = { economy: "Economy", phillips: "Phillips curve", initial: "Initial state", numerics: "Numerics" };
@@ -946,10 +1329,18 @@ button:disabled { opacity: 0.55; cursor: progress; }
         div.innerHTML = `
           <label for="p-${esc(p.name)}"><span>${esc(p.label)}</span><output id="o-${esc(p.name)}"></output></label>
           <input type="range" id="p-${esc(p.name)}" name="${esc(p.name)}"
-                 min="${Number(p.min)}" max="${Number(p.max)}" step="${Number(p.step)}" value="${Number(value)}">`;
+                 min="${Number(p.min)}" max="${Number(p.max)}" step="${Number(p.step)}" value="${Number(value)}">
+          <div class="scale">
+            <button type="button" class="end" id="min-${esc(p.name)}" title="Set to the minimum">${esc(Number(p.min).toFixed(decimals(p.step)))}</button>
+            <span class="scale-mid"></span>
+            <button type="button" class="end" id="max-${esc(p.name)}" title="Set to the maximum">${esc(Number(p.max).toFixed(decimals(p.step)))}</button>
+          </div>`;
         sec.appendChild(div);
         const input = div.querySelector("input");
         const out = div.querySelector("output");
+        exp.attach(div, p, input);
+        div.querySelector(".end[id^=min-]").addEventListener("click", () => setParam(p.name, p.min));
+        div.querySelector(".end[id^=max-]").addEventListener("click", () => setParam(p.name, p.max));
         const show = () => (out.textContent = Number(input.value).toFixed(decimals(p.step)));
         show();
         input.addEventListener("input", () => {
@@ -961,6 +1352,15 @@ button:disabled { opacity: 0.55; cursor: progress; }
       });
       root.appendChild(sec);
     });
+  }
+
+  /* Move a parameter's slider to a value (clamped to its range) and re-run, as if dragged there. */
+  function setParam(name, value) {
+    const input = $("p-" + name);
+    if (!input) return;
+    const x = Math.min(Number(input.max), Math.max(Number(input.min), Number(value)));
+    input.value = x;
+    input.dispatchEvent(new Event("input"));
   }
 
   function resetDefaults() {
@@ -980,17 +1380,12 @@ button:disabled { opacity: 0.55; cursor: progress; }
     const base = {
       animation: false, responsive: true, maintainAspectRatio: false, parsing: false,
       interaction: { mode: "nearest", intersect: false },
-      plugins: { legend: { labels: { boxWidth: 14, boxHeight: 2 } } },
+      plugins: { legend: { labels: { boxWidth: 14, boxHeight: 2, filter: (item, data) => !data.datasets[item.datasetIndex].noLegend } } },
       elements: { point: { radius: 0 }, line: { borderWidth: 2 } },
     };
     tsChart = new Chart($("ts-chart"), {
       type: "line",
-      data: { datasets: [
-        { label: "u  wage share", data: [], borderColor: css("--u") },
-        { label: "v  employment", data: [], borderColor: css("--v") },
-        { label: "u*", data: [], borderColor: css("--u"), borderDash: [5, 4], borderWidth: 1 },
-        { label: "v*", data: [], borderColor: css("--v"), borderDash: [5, 4], borderWidth: 1 },
-      ] },
+      data: { datasets: [] },
       options: { ...base, scales: {
         x: { type: "linear", title: { display: true, text: "t (years)" } },
         y: { title: { display: true, text: "share / rate" } },
@@ -998,11 +1393,7 @@ button:disabled { opacity: 0.55; cursor: progress; }
     });
     phaseChart = new Chart($("phase-chart"), {
       type: "scatter",
-      data: { datasets: [
-        { label: "orbit", data: [], showLine: true, borderColor: css("--accent"), pointRadius: 0 },
-        { label: "equilibrium (v*, u*)", data: [], pointRadius: 5, pointStyle: "crossRot", borderColor: css("--ink"), borderWidth: 2 },
-        { label: "start", data: [], pointRadius: 4, backgroundColor: css("--u"), borderColor: css("--u") },
-      ] },
+      data: { datasets: [] },
       // parsing stays on here: the orbit is not sorted by x, and Chart.js only scans
       // the full data range for unsorted data when it parses it.
       options: { ...base, parsing: true, scales: {
@@ -1012,17 +1403,49 @@ button:disabled { opacity: 0.55; cursor: progress; }
     });
   }
 
-  function render(res) {
+  const xy = (xs, ys) => xs.map((x, i) => ({ x, y: ys[i] }));
+  const hline = (t, y) => [{ x: t[0], y }, { x: t[t.length - 1], y }];
+
+  /* res: the base simulation. experiment: the result of run_experiment, or null. */
+  function render(res, experiment = null) {
     const { t, u, v, equilibrium: eq, summary: s } = res;
-    const t0 = t[0], t1 = t[t.length - 1];
-    tsChart.data.datasets[0].data = t.map((x, i) => ({ x, y: u[i] }));
-    tsChart.data.datasets[1].data = t.map((x, i) => ({ x, y: v[i] }));
-    tsChart.data.datasets[2].data = [{ x: t0, y: eq.u_star }, { x: t1, y: eq.u_star }];
-    tsChart.data.datasets[3].data = [{ x: t0, y: eq.v_star }, { x: t1, y: eq.v_star }];
+    const scenarios = experiment ? experiment.scenarios.filter((sc) => sc.result) : [];
+
+    if (!experiment) {
+      tsChart.data.datasets = [
+        { label: "u  wage share", data: xy(t, u), borderColor: css("--u") },
+        { label: "v  employment", data: xy(t, v), borderColor: css("--v") },
+        { label: "u*", data: hline(t, eq.u_star), borderColor: css("--u"), borderDash: [5, 4], borderWidth: 1 },
+        { label: "v*", data: hline(t, eq.v_star), borderColor: css("--v"), borderDash: [5, 4], borderWidth: 1 },
+      ];
+    } else {
+      // sensitivity view: one variable, base in ink, each scenario in its own colour
+      const key = exp.variable;
+      const name = key === "u" ? "u  wage share" : "v  employment";
+      tsChart.data.datasets = [
+        ...scenarios.map((sc) => {
+          const c = exp.colorFor(sc);
+          return { label: sc.label, data: xy(sc.result.t, sc.result[key]), borderColor: c.color, borderDash: c.dash, borderWidth: 1.5 };
+        }),
+        { label: `base · ${name}`, data: xy(t, res[key]), borderColor: css("--ink"), borderWidth: 2.5 },
+        { label: key + "*", data: hline(t, eq[key + "_star"]), borderColor: css("--ink"), borderDash: [2, 4], borderWidth: 1, noLegend: true },
+      ];
+    }
     tsChart.update();
-    phaseChart.data.datasets[0].data = v.map((x, i) => ({ x, y: u[i] }));
-    phaseChart.data.datasets[1].data = [{ x: eq.v_star, y: eq.u_star }];
-    phaseChart.data.datasets[2].data = [{ x: v[0], y: u[0] }];
+
+    phaseChart.data.datasets = [
+      ...scenarios.map((sc) => {
+        const c = exp.colorFor(sc);
+        return { label: sc.label, data: xy(sc.result.v, sc.result.u), showLine: true, pointRadius: 0,
+          borderColor: c.color, borderDash: c.dash, borderWidth: 1.5 };
+      }),
+      { label: experiment ? "base orbit" : "orbit", data: xy(v, u), showLine: true, pointRadius: 0,
+        borderColor: experiment ? css("--ink") : css("--accent"), borderWidth: experiment ? 2.5 : 2 },
+      { label: "equilibrium (v*, u*)", data: [{ x: eq.v_star, y: eq.u_star }], pointRadius: 5, pointStyle: "crossRot",
+        borderColor: css("--ink"), borderWidth: 2, noLegend: !!experiment },
+      { label: "start", data: [{ x: v[0], y: u[0] }], pointRadius: 4, backgroundColor: css("--u"), borderColor: css("--u"),
+        noLegend: !!experiment },
+    ];
     phaseChart.update();
 
     const f = (x, d = 3) => (x === null || x === undefined ? "—" : Number(x).toFixed(d));
@@ -1038,9 +1461,14 @@ button:disabled { opacity: 0.55; cursor: progress; }
       .map(([k, val]) => `<div class="stat"><div class="k">${k}</div><div class="val">${val}</div></div>`)
       .join("");
 
+    const failed = experiment ? experiment.scenarios.filter((sc) => sc.error).length : 0;
+    const warnings = [...res.warnings];
+    if (failed) warnings.push(`${failed} scenario${failed > 1 ? "s" : ""} failed; see the scenario table.`);
     const w = $("warnings");
-    w.hidden = !res.warnings.length;
-    w.textContent = res.warnings.join(" ");
+    w.hidden = !warnings.length;
+    w.textContent = warnings.join(" ");
+
+    if (experiment) exp.apply(experiment); else exp.clear();
   }
 
   /* -------------------------- run loop (debounced) -------------------------- */
@@ -1057,13 +1485,24 @@ button:disabled { opacity: 0.55; cursor: progress; }
     const params = { ...state.params };
     const t0 = performance.now();
     try {
-      const res = await api.call("simulate", params);
+      const req = exp.request(params);   // null unless an exercise is switched on
+      let res, experiment = null;
+      if (req) {
+        experiment = await api.call(req.fn, req.args);
+        res = experiment.base;
+      } else {
+        res = await api.call("simulate", params);
+      }
       const ms = performance.now() - t0;
       state.last = res;
+      state.experiment = experiment;
       state.runs++;
-      render(res);
+      render(res, experiment);
       setState("ready");
-      setStatus(`${res.summary.steps.toLocaleString()} RK4 steps · ${ms.toFixed(0)} ms round-trip · ${api.info.runtime}`);
+      const n = experiment ? experiment.scenarios.length : 0;
+      setStatus(`${((n + 1) * res.summary.steps).toLocaleString()} RK4 steps` +
+        (experiment ? ` · ${n + 1} simulations (base + ${n} scenario${n === 1 ? "" : "s"})` : "") +
+        ` · ${ms.toFixed(0)} ms round-trip · ${api.info.runtime}`);
     } catch (e) {
       state.lastError = { type: e.pyType, message: e.message, line: e.line };
       setState("error");
@@ -1076,7 +1515,7 @@ button:disabled { opacity: 0.55; cursor: progress; }
   }
 
   /* ----------------------------- Python editor ----------------------------- */
-  const APP_VERSION = "1.1.0";
+  const APP_VERSION = "1.2.0";
   let editor = null;
   let original = "";
   let errorLine = null;
@@ -1318,6 +1757,10 @@ button:disabled { opacity: 0.55; cursor: progress; }
       state.meta = await api.call("describe");
       buildControls(state.meta);
       $("reset").addEventListener("click", resetDefaults);
+      $("sens-on").addEventListener("change", (e) => exp.setEnabled(e.target.checked));
+      $("sens-clear").addEventListener("click", () => exp.clearAll());
+      document.querySelectorAll('input[name="ts-var"]').forEach((el) =>
+        el.addEventListener("change", () => { exp.setVariable(el.value); if (state.last) render(state.last, state.experiment); }));
       await run();
       await setupEditor();
     } catch (e) {
