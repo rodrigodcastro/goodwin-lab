@@ -415,7 +415,7 @@ body[data-state="error"] .backend .dot { background: var(--err-ink); }
   padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
 }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
-.controls { padding: 14px 16px; align-self: start; position: sticky; top: calc(12px + env(safe-area-inset-top, 0px)); }
+.controls { padding: 14px 16px; align-self: start; }
 .group + .group { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
 .group h2 {
   margin: 0 0 8px; font-size: 11.5px; font-weight: 600; text-transform: uppercase;
@@ -445,7 +445,7 @@ body[data-state="error"] .status { color: var(--err-ink); background: var(--err-
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
 .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .stat .k { font-size: 12px; color: var(--muted); }
-.stat .val { font: 500 17px var(--mono); margin-top: 2px; }
+.stat .val { font: 500 16px var(--mono); margin-top: 2px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 .model { padding: 10px 14px; }
 .model summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
@@ -666,7 +666,7 @@ body.sens-on .seg { display: inline-flex; }
 .scenarios table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 .scenarios th { text-align: left; font-weight: 600; color: var(--muted); padding: 4px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .scenarios td { padding: 4px 8px; border-bottom: 1px solid var(--line); font-family: var(--mono); white-space: nowrap; }
-.scenarios td:nth-child(2) { font-family: inherit; }
+.scenarios td:nth-child(3) { font-family: inherit; }
 .scenarios tr.base td { font-weight: 600; }
 .scenarios tr.err td { color: var(--err-ink); }
 @media (max-width: 900px) { body.sens-on .layout { grid-template-columns: 1fr; } }
@@ -688,6 +688,121 @@ body.sens-on .seg { display: inline-flex; }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
 .end:focus-visible, .to-val:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* ---------------- parameter blocks by role ---------------- */
+:root {
+  --role-sys-bg: #eaf3f4; --role-sys-line: #c5dfe3; --role-sys-ink: #1a6878;
+  --role-init-bg: #fbf0e1; --role-init-line: #efd6b3; --role-init-ink: #8a5a14;
+  --role-exp-bg: #efedf8; --role-exp-line: #d6d0ef; --role-exp-ink: #5b4a9e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --role-sys-bg: #15272c; --role-sys-line: #22424a; --role-sys-ink: #6fc3d3;
+    --role-init-bg: #2a2218; --role-init-line: #4a3a22; --role-init-ink: #e5b26a;
+    --role-exp-bg: #221f30; --role-exp-line: #3a3452; --role-exp-ink: #b6a8ec;
+  }
+}
+:root[data-theme="dark"] {
+  --role-sys-bg: #15272c; --role-sys-line: #22424a; --role-sys-ink: #6fc3d3;
+  --role-init-bg: #2a2218; --role-init-line: #4a3a22; --role-init-ink: #e5b26a;
+  --role-exp-bg: #221f30; --role-exp-line: #3a3452; --role-exp-ink: #b6a8ec;
+}
+#controls { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.role-block { border-radius: 10px; padding: 10px 12px; border: 1px solid; }
+.role-system { background: var(--role-sys-bg); border-color: var(--role-sys-line); --role-ink: var(--role-sys-ink); }
+.role-initial { background: var(--role-init-bg); border-color: var(--role-init-line); --role-ink: var(--role-init-ink); }
+.role-experiment { background: var(--role-exp-bg); border-color: var(--role-exp-line); --role-ink: var(--role-exp-ink); }
+.role-block .group h2 { color: var(--role-ink); }
+.role-block .group + .group { margin-top: 12px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--role-ink) 25%, transparent); }
+.role-block .dev input, .role-block .chip { background: var(--panel); }
+
+/* ---------------- output results ---------------- */
+.output { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.out-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.out-head h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.out-summary { font: 12px var(--mono); color: var(--muted); }
+.out-runs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; max-height: 120px; overflow-y: auto; }
+.out-runs li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.out-runs b { font: 500 12px var(--mono); }
+.out-runs li.err { color: var(--err-ink); }
+.out-export { border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.out-export h3 { margin: 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.out-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; }
+.out-row input[type="number"] {
+  width: 84px; font: 13px var(--mono); padding: 4px 6px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink); text-align: right;
+}
+.out-row input[type="number"]:disabled { opacity: .5; }
+.out-row .chips { margin-left: 0; }
+.out-all { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 13px; }
+.out-note { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 90ch; }
+#out-sampling { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+.out-files { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.out-file { display: flex; flex-direction: column; gap: 4px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.out-file p { margin: 0; font-size: 12px; color: var(--muted); }
+.out-file button { align-self: flex-start; }
+.out-status { font: 12.5px var(--mono); color: var(--muted); min-height: 18px; }
+.out-status.ok { color: var(--ok); }
+.out-status.err { color: var(--err-ink); }
+#out-preview-btn { align-self: flex-start; }
+.out-preview { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+.out-prev { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.out-prev-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.out-prev-head b { color: var(--ink); }
+.out-prev-head button { margin-left: auto; }
+.out-prev pre {
+  margin: 0; font: 11.5px/1.5 var(--mono); background: var(--code-bg); color: var(--code-ink);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; overflow: auto; max-height: 220px;
+}
+
+/* ---------------- model (math) ---------------- */
+.model-body h3 { margin: 14px 0 4px; font-size: 13px; font-weight: 600; }
+.model-defs { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 8px 0; font-size: 13.5px; }
+.model-defs dt { font: 500 13.5px var(--mono); color: var(--accent); }
+.model-defs dd { margin: 0; }
+
+/* ---------------- footer + tech specs ---------------- */
+.foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 0 32px; }
+.foot-note { font-size: 12.5px; color: var(--muted); }
+.specs { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; line-height: 1.5; }
+.specs code, .tech-body code { font-size: 12.5px; }
+
+/* ---------------- choices (segmented) ---------------- */
+.param.choice { display: flex; flex-direction: column; gap: 4px; }
+.choice-label { font-size: 13.5px; }
+.seg.seg-choice { display: inline-flex; align-self: flex-start; flex-wrap: wrap; background: var(--panel); }
+.seg.seg-choice label { padding: 4px 10px; font-size: 12px; }
+.param[hidden] { display: none !important; }
+
+/* ---------------- error control panel ---------------- */
+.errc { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.errc-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.errc-head h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.errc-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.ec-tile { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--bg); min-width: 0; }
+.ec-tile .k { font-size: 12px; color: var(--muted); }
+.ec-tile .val { font: 500 15px var(--mono); margin-top: 2px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ec-tile .val .sub { font-size: 11.5px; color: var(--muted); font-weight: 400; }
+.ec-tile .hint { font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+.ec-tile.big .val { font-size: 18px; }
+.ec-tile.good { border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); }
+.ec-tile.good .val { color: var(--ok); }
+.ec-tile.warn { border-color: color-mix(in srgb, var(--warn-ink) 55%, var(--line)); }
+.ec-tile.warn .val { color: var(--warn-ink); }
+.ec-tile.bad { border-color: var(--err-ink); }
+.ec-tile.bad .val { color: var(--err-ink); }
+.errc-note { margin: 0; font-size: 13px; color: var(--muted); max-width: 95ch; }
+.errc-chart { margin: 0; }
+.errc-chart figcaption { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.canvas-box.small { height: 190px; }
+.errc-runs table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.errc-runs th { text-align: left; font-weight: 600; color: var(--muted); padding: 4px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.errc-runs td { padding: 4px 8px; border-bottom: 1px solid var(--line); font-family: var(--mono); white-space: nowrap; }
+.errc-runs td:nth-child(2) { font-family: inherit; }
+.errc-runs tr.worst td { background: color-mix(in srgb, var(--warn-ink) 10%, transparent); }
+.errc-runs td.good { color: var(--ok); } .errc-runs td.warn { color: var(--warn-ink); } .errc-runs td.bad { color: var(--err-ink); }
+.errc-runs tr.err td { color: var(--err-ink); }
+.errc-worst { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+
 </style>
 </head>
 <body data-state="loading">
@@ -700,10 +815,6 @@ body.sens-on .seg { display: inline-flex; }
       <div class="backend" id="backend" title="Where the Python code is running">
         <span class="dot"></span><span id="backend-text">starting…</span>
       </div>
-      <button id="tech-open" class="ghost" type="button" aria-haspopup="dialog">
-        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.01"></path></svg>
-        Tech info
-      </button>
     </div>
   </header>
 
@@ -747,22 +858,98 @@ body.sens-on .seg { display: inline-flex; }
 
       <div class="stats" id="stats"></div>
 
+      <section class="panel errc" id="errc" hidden aria-labelledby="errc-title">
+        <div class="errc-head">
+          <h2 id="errc-title">Error control &amp; solver statistics</h2>
+          <span class="pill" id="errc-method"></span>
+        </div>
+        <div class="errc-tiles" id="errc-tiles"></div>
+        <p class="errc-note" id="errc-note"></p>
+        <figure class="errc-chart">
+          <figcaption>Step size over time <span class="muted">(log scale; one line per run)</span></figcaption>
+          <div class="canvas-box small"><canvas id="h-chart" aria-label="Step size over time"></canvas></div>
+        </figure>
+        <div class="errc-runs" id="errc-runs" hidden></div>
+      </section>
+
       <section class="panel scenarios" id="scenarios" hidden aria-label="Sensitivity scenarios">
         <div class="scen-head"><h2>Sensitivity scenarios</h2><span class="scen-count"></span></div>
         <p class="scen-note">One parameter moved at a time; the others stay at the slider values. Dashed = lower deviation, solid = upper.</p>
         <div class="scen-body"></div>
       </section>
 
+      <section class="panel output" id="output" aria-labelledby="out-title">
+        <div class="out-head">
+          <h2 id="out-title">Output results</h2>
+          <span class="out-summary" id="out-summary"></span>
+        </div>
+        <ul class="out-runs" id="out-runs" aria-label="Runs and their ids"></ul>
+
+        <div class="out-export">
+          <h3>Export to CSV</h3>
+          <div class="out-row">
+            <label for="out-samples">Sample points per run</label>
+            <input type="number" id="out-samples" min="2" step="1" value="101" inputmode="numeric">
+            <span class="chips" id="out-presets" role="group" aria-label="Sample point presets"></span>
+            <label class="out-all"><input type="checkbox" id="out-all"> all points</label>
+          </div>
+          <p class="out-note" id="out-sampling"></p>
+          <div class="out-files">
+            <div class="out-file">
+              <button type="button" class="primary" id="out-dl-ts">Download time series CSV</button>
+              <p><code>run_id, sample, t, u, v</code> · one row per run and sample point</p>
+            </div>
+            <div class="out-file">
+              <button type="button" class="primary" id="out-dl-par">Download parameters CSV</button>
+              <p><code>run_id, scenario, …, solver stats, method, …, alpha … atol</code> · one row per run</p>
+            </div>
+          </div>
+          <p class="out-note"><span id="out-points-note"></span> Both files use the same run ids as the charts and the
+            scenario table. The parameters file also carries each run's solver statistics (steps, rejected steps,
+            derivative evaluations, step-size range, global error estimate, invariant drift). A failed scenario keeps its
+            row in the parameters file (status = error) and has no rows in the time series file.</p>
+          <div class="out-status" id="out-status" role="status"></div>
+          <button type="button" class="small" id="out-preview-btn">Preview / copy</button>
+          <div class="out-preview" id="out-preview" hidden>
+            <div class="out-prev">
+              <div class="out-prev-head"><b>Time series</b> <span id="out-prev-ts-n"></span>
+                <button type="button" class="small" id="out-copy-ts">Copy</button></div>
+              <pre id="out-prev-ts"></pre>
+            </div>
+            <div class="out-prev">
+              <div class="out-prev-head"><b>Parameters</b> <span id="out-prev-par-n"></span>
+                <button type="button" class="small" id="out-copy-par">Copy</button></div>
+              <pre id="out-prev-par"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <details class="panel model">
-        <summary>Model &amp; architecture</summary>
+        <summary>Model</summary>
         <div class="model-body">
-          <p class="eq">u̇ = u (−γ + ρv − α) &nbsp;&nbsp;&nbsp; v̇ = v ((1 − u)/σ − α − β)</p>
-          <p>u is the wage share, v the employment rate. The interior equilibrium is
-            v* = (α+γ)/ρ and u* = 1 − σ(α+β). Orbits are closed cycles; the conserved quantity
-            H(u,v) is tracked to report numerical drift.</p>
-          <p>The solver is a plain Python module (<code>core/goodwin.py</code>). In <b>browser</b> mode it runs in
-            Pyodide (CPython compiled to WebAssembly) in a Web Worker; in <b>server</b> mode the identical file
-            runs behind FastAPI. The front end only talks to <code>api.js</code>.</p>
+          <p class="eq">u̇ = u · (φ(v) − α) &nbsp;&nbsp;&nbsp; φ(v) = −γ + ρ v<br>
+            v̇ = v · ((1 − u) / σ − α − β)</p>
+          <dl class="model-defs">
+            <dt>u</dt><dd>wage share of output (workers' share), so 1 − u is the profit share</dd>
+            <dt>v</dt><dd>employment rate (employed labour ÷ labour force)</dd>
+            <dt>α, β</dt><dd>growth rates of labour productivity and of the labour force</dd>
+            <dt>σ</dt><dd>capital–output ratio; all profits are invested, so output grows at (1 − u)/σ</dd>
+            <dt>φ(v)</dt><dd>linear Phillips curve: real-wage growth rises with employment (intercept −γ, slope ρ)</dd>
+          </dl>
+          <h3>Equilibrium</h3>
+          <p class="eq">v* = (α + γ) / ρ &nbsp;&nbsp;&nbsp; u* = 1 − σ (α + β)</p>
+          <p>An interior equilibrium needs u* &gt; 0 and v* &gt; 0. The model itself does not keep u and v
+            below 1; values above 1 are economically meaningless and flagged as warnings.</p>
+          <h3>Cycles</h3>
+          <p>The system is of Lotka–Volterra type: employment plays the prey and the wage share the predator.
+            High employment pushes wages up, the profit share falls, accumulation and employment slow, wages
+            then lag, profits recover, and the cycle repeats. The quantity</p>
+          <p class="eq">H(u, v) = u/σ − a ln u + ρ v − c ln v, &nbsp; a = 1/σ − α − β, &nbsp; c = α + γ</p>
+          <p>is constant along every trajectory, so orbits are closed curves around (v*, u*): neither damped
+            nor explosive, with amplitude set by the initial state. Near the equilibrium the period is</p>
+          <p class="eq">T ≈ 2π / √(a · c)</p>
+          <p>and larger orbits take somewhat longer.</p>
         </div>
       </details>
     </section>
@@ -788,9 +975,17 @@ body.sens-on .seg { display: inline-flex; }
     </details>
   </section>
 
+  <footer class="wrap foot">
+    <button id="tech-open" class="ghost" type="button" aria-haspopup="dialog">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.01"></path></svg>
+      Tech specs &amp; versions
+    </button>
+    <span class="foot-note">Solver, architecture and library versions</span>
+  </footer>
+
   <dialog id="tech" class="tech" aria-labelledby="tech-title">
     <div class="tech-head">
-      <h2 id="tech-title">Tech info</h2>
+      <h2 id="tech-title">Tech specs &amp; versions</h2>
       <button id="tech-close" class="ghost" type="button" aria-label="Close">✕</button>
     </div>
     <div id="tech-body" class="tech-body">Collecting versions…</div>
@@ -805,7 +1000,7 @@ body.sens-on .seg { display: inline-flex; }
         mode: apiBase ? "server" : "browser",
         baseUrl: apiBase || "",
         pythonSources: {
-          "lab.py": "\"\"\"\nlab.py \u2014 the public face of the Python side. Both transports load THIS module:\nthe Pyodide worker in the browser and FastAPI on the server.\n\n    model        : goodwin.py      (the mathematical model, editable in the browser)\n    experiments  : experiments.py  (model-agnostic exercises: sensitivity, sweeps, ...)\n\nOnly the names in PUBLIC_FUNCTIONS can be called from the front end. Every function takes\nJSON-friendly keyword arguments and returns JSON-friendly values.\n\"\"\"\n\nimport experiments\nimport goodwin as model\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\", \"experiment_kinds\", \"run_experiment\")\n\n\ndef describe():\n    return model.describe()\n\n\ndef equilibrium(**params):\n    return model.equilibrium(**params)\n\n\ndef simulate(**params):\n    return model.simulate(**params)\n\n\ndef experiment_kinds():\n    return experiments.kinds()\n\n\ndef run_experiment(kind=\"deviation_oat\", base=None, spec=None):\n    return experiments.run(model, kind, base or {}, spec or {})\n","goodwin.py": "\"\"\"\nGoodwin (1967) growth-cycle model \u2014 pure Python, no dependencies.\n\nThis module is the \"Python block\" of the app. It is deliberately free of any\nbrowser or server code, so the very same file runs:\n  * inside the browser (Pyodide, loaded by web/py-runtime.js), and\n  * on a server (imported by server/main.py with FastAPI).\n\nContract: every public function takes JSON-friendly keyword arguments and\nreturns JSON-friendly values (dict / list / float / str). Invalid input raises\nValueError, which both transports turn into an error message for the UI.\n\nModel (u = wage share, v = employment rate):\n    du/dt = u * (phi(v) - alpha)            phi(v) = -gamma + rho * v\n    dv/dt = v * ((1 - u) / sigma - alpha - beta)\n\n    alpha : labour-productivity growth rate\n    beta  : labour-force growth rate\n    sigma : capital-output ratio\n    gamma, rho : linear Phillips curve (wage growth vs. employment)\n\nInterior equilibrium:  v* = (alpha + gamma) / rho,  u* = 1 - sigma (alpha + beta)\nThe system is Lotka-Volterra-like and conserves\n    H(u, v) = u/sigma - a ln u + rho v - c ln v,  a = 1/sigma - alpha - beta, c = alpha + gamma\nso orbits are closed cycles; the drift of H measures numerical error.\n\"\"\"\n\nimport math\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\")\n\nMAX_STEPS = 200_000\nMAX_POINTS = 2_000\n\n_PARAMS = [\n    # name, label, default, min, max, step, group\n    (\"alpha\", \"Productivity growth \u03b1\", 0.02, 0.0, 0.10, 0.001, \"economy\"),\n    (\"beta\", \"Labour-force growth \u03b2\", 0.01, 0.0, 0.10, 0.001, \"economy\"),\n    (\"sigma\", \"Capital-output ratio \u03c3\", 3.0, 0.5, 8.0, 0.1, \"economy\"),\n    (\"gamma\", \"Phillips intercept \u03b3\", 0.4, 0.0, 2.0, 0.01, \"phillips\"),\n    (\"rho\", \"Phillips slope \u03c1\", 0.5, 0.05, 3.0, 0.01, \"phillips\"),\n    (\"u0\", \"Initial wage share u\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"v0\", \"Initial employment v\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"t_max\", \"Horizon (years)\", 100.0, 1.0, 500.0, 1.0, \"numerics\"),\n    (\"dt\", \"Step size (years)\", 0.05, 0.001, 1.0, 0.001, \"numerics\"),\n]\n\n\ndef describe():\n    \"\"\"Parameter metadata, so the UI can build its controls from Python.\"\"\"\n    return {\n        \"model\": \"Goodwin growth cycle\",\n        \"method\": \"Classical Runge-Kutta 4 (fixed step)\",\n        \"parameters\": [\n            {\"name\": n, \"label\": l, \"default\": d, \"min\": lo, \"max\": hi, \"step\": s, \"group\": g}\n            for n, l, d, lo, hi, s, g in _PARAMS\n        ],\n    }\n\n\ndef _defaults():\n    return {p[0]: p[2] for p in _PARAMS}\n\n\ndef _clean(params):\n    \"\"\"Merge with defaults, coerce to float and validate. Raises ValueError.\"\"\"\n    unknown = set(params) - set(_defaults())\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s): {', '.join(sorted(unknown))}\")\n    p = _defaults()\n    for k, val in params.items():\n        try:\n            x = float(val)\n        except (TypeError, ValueError):\n            raise ValueError(f\"Parameter '{k}' must be a number, got {val!r}\")\n        if not math.isfinite(x):\n            raise ValueError(f\"Parameter '{k}' must be finite\")\n        p[k] = x\n    for k in (\"sigma\", \"rho\", \"u0\", \"v0\", \"t_max\", \"dt\"):\n        if p[k] <= 0:\n            raise ValueError(f\"Parameter '{k}' must be > 0\")\n    for k in (\"alpha\", \"beta\", \"gamma\"):\n        if p[k] < 0:\n            raise ValueError(f\"Parameter '{k}' must be >= 0\")\n    if p[\"t_max\"] / p[\"dt\"] > MAX_STEPS:\n        raise ValueError(f\"Too many steps (t_max/dt > {MAX_STEPS}); increase dt or reduce t_max\")\n    return p\n\n\ndef _eq(p):\n    u_star = 1.0 - p[\"sigma\"] * (p[\"alpha\"] + p[\"beta\"])\n    v_star = (p[\"alpha\"] + p[\"gamma\"]) / p[\"rho\"]\n    return u_star, v_star\n\n\ndef equilibrium(**params):\n    \"\"\"Interior equilibrium and small-oscillation period.\"\"\"\n    p = _clean(params)\n    u_star, v_star = _eq(p)\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    period = 2.0 * math.pi / math.sqrt(a * c) if a > 0 and c > 0 else None\n    return {\n        \"u_star\": u_star,\n        \"v_star\": v_star,\n        \"interior\": u_star > 0 and v_star > 0,\n        \"linear_period\": period,\n    }\n\n\ndef _rhs(u, v, p):\n    du = u * (-p[\"gamma\"] + p[\"rho\"] * v - p[\"alpha\"])\n    dv = v * ((1.0 - u) / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"])\n    return du, dv\n\n\ndef _invariant(u, v, p):\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    return u / p[\"sigma\"] - a * math.log(u) + p[\"rho\"] * v - c * math.log(v)\n\n\ndef simulate(**params):\n    \"\"\"Integrate the model with RK4. Returns time series plus diagnostics.\"\"\"\n    p = _clean(params)\n    dt, n = p[\"dt\"], int(round(p[\"t_max\"] / p[\"dt\"]))\n    u, v = p[\"u0\"], p[\"v0\"]\n    stride = max(1, math.ceil((n + 1) / MAX_POINTS))\n\n    ts, us, vs = [0.0], [u], [v]\n    u_star, v_star = _eq(p)\n    crossings = []  # times u crosses u* upwards -> period estimate\n    h0 = _invariant(u, v, p)\n    h_drift = 0.0\n\n    for i in range(1, n + 1):\n        k1 = _rhs(u, v, p)\n        k2 = _rhs(u + 0.5 * dt * k1[0], v + 0.5 * dt * k1[1], p)\n        k3 = _rhs(u + 0.5 * dt * k2[0], v + 0.5 * dt * k2[1], p)\n        k4 = _rhs(u + dt * k3[0], v + dt * k3[1], p)\n        un = u + dt / 6.0 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0])\n        vn = v + dt / 6.0 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1])\n        if not (math.isfinite(un) and math.isfinite(vn)) or un <= 0 or vn <= 0:\n            raise ValueError(f\"Integration became unstable at t={i * dt:.3f}; try a smaller dt\")\n        if u < u_star <= un:\n            crossings.append((i - 1 + (u_star - u) / (un - u)) * dt)\n        u, v = un, vn\n        h_drift = max(h_drift, abs(_invariant(u, v, p) - h0))\n        if i % stride == 0 or i == n:\n            ts.append(i * dt)\n            us.append(u)\n            vs.append(v)\n\n    period = None\n    if len(crossings) >= 2:\n        period = (crossings[-1] - crossings[0]) / (len(crossings) - 1)\n\n    warnings = []\n    if max(vs) > 1.0:\n        warnings.append(\"Employment rate exceeds 100% on the orbit (v > 1).\")\n    if max(us) > 1.0:\n        warnings.append(\"Wage share exceeds 100% on the orbit (u > 1).\")\n    if u_star <= 0:\n        warnings.append(\"No interior equilibrium: u* \u2264 0 (\u03c3(\u03b1+\u03b2) \u2265 1).\")\n\n    return {\n        \"params\": p,\n        \"t\": ts,\n        \"u\": us,\n        \"v\": vs,\n        \"equilibrium\": {\"u_star\": u_star, \"v_star\": v_star},\n        \"summary\": {\n            \"steps\": n,\n            \"u_min\": min(us), \"u_max\": max(us),\n            \"v_min\": min(vs), \"v_max\": max(vs),\n            \"period\": period,\n            \"invariant_drift\": h_drift / abs(h0) if h0 else h_drift,\n        },\n        \"warnings\": warnings,\n    }\n","experiments.py": "\"\"\"\nexperiments.py \u2014 model-agnostic engine for simulation exercises (sensitivity, sweeps, ...).\n\nIt never draws anything and knows nothing about the UI. It works with any model module that\noffers the same contract as goodwin.py:\n\n    model.describe()  -> {\"parameters\": [{\"name\", \"min\", \"max\", \"default\", ...}, ...]}\n    model.simulate(**params) -> {\"summary\": {...}, \"equilibrium\": {...}, ...}\n\nEach exercise kind is a function registered in EXPERIMENTS. All of them take\n(model, base, spec) and return a JSON-friendly dict with at least:\n\n    {\"kind\": str, \"base\": <simulate result>, \"scenarios\": [<scenario>, ...]}\n\nwhere every scenario is\n    {\"id\", \"label\", \"params\": {...}, \"changed\": {...}, \"result\": <simulate result> | None,\n     \"error\": {\"type\", \"message\"} | None, \"delta\": {metric: scenario - base}}\n\nAdding a new kind (grid search, Sobol, Monte Carlo...) = write one function and register it;\nthe transport (Pyodide worker or FastAPI) and the front end's generic rendering do not change.\n\"\"\"\n\nimport math\n\n# Summary metrics compared against the base run (keys of simulate()[\"summary\"] / [\"equilibrium\"]).\nMETRICS = (\n    (\"period\", \"summary\"),\n    (\"u_min\", \"summary\"),\n    (\"u_max\", \"summary\"),\n    (\"v_min\", \"summary\"),\n    (\"v_max\", \"summary\"),\n    (\"u_star\", \"equilibrium\"),\n    (\"v_star\", \"equilibrium\"),\n)\n\nMAX_SCENARIOS = 64\n\n\n# ----------------------------------------------------------------------------- helpers\ndef _limits(model):\n    return {p[\"name\"]: p for p in model.describe()[\"parameters\"]}\n\n\ndef _metric(result, name, where):\n    value = result.get(where, {}).get(name)\n    return value if isinstance(value, (int, float)) and math.isfinite(value) else None\n\n\ndef _delta(result, base):\n    out = {}\n    for name, where in METRICS:\n        a, b = _metric(result, name, where), _metric(base, name, where)\n        out[name] = None if a is None or b is None else a - b\n    return out\n\n\ndef _run(model, params):\n    \"\"\"Run one simulation, capturing model errors so one bad scenario does not sink the rest.\"\"\"\n    try:\n        return model.simulate(**params), None\n    except (ValueError, ZeroDivisionError, OverflowError, ArithmeticError) as e:\n        return None, {\"type\": type(e).__name__, \"message\": str(e)}\n\n\ndef _number(value, what):\n    try:\n        x = float(value)\n    except (TypeError, ValueError):\n        raise ValueError(f\"{what} must be a number, got {value!r}\")\n    if not math.isfinite(x):\n        raise ValueError(f\"{what} must be finite\")\n    return x\n\n\ndef deviation_bounds(value, down_pct, up_pct, lo, hi):\n    \"\"\"\n    Interval [value - down%, value + up%] (percentages of |value|), clamped to [lo, hi].\n    Returns (low, high, low_capped, high_capped).\n    \"\"\"\n    span = abs(value)\n    low_raw = value - span * down_pct / 100.0\n    high_raw = value + span * up_pct / 100.0\n    low, high = max(low_raw, lo), min(high_raw, hi)\n    return low, high, low_raw < lo, high_raw > hi\n\n\n# ------------------------------------------------------------------- experiment kinds\ndef deviation_oat(model, base, spec):\n    \"\"\"\n    Manual sensitivity: for each parameter with a non-zero deviation, run one simulation at\n    value\u00b7(1 \u2212 down%) and one at value\u00b7(1 + up%), changing ONE parameter at a time (OAT),\n    the others held at the base values. Bounds are clamped to the parameter's [min, max].\n\n    spec = {\"deviations\": {\"alpha\": {\"down\": 10, \"up\": 20}, ...}}   (percent, default 0)\n    \"\"\"\n    limits = _limits(model)\n    deviations = (spec or {}).get(\"deviations\") or {}\n    if not isinstance(deviations, dict):\n        raise ValueError(\"spec.deviations must be an object {param: {down, up}}\")\n    unknown = set(deviations) - set(limits)\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s) in deviations: {', '.join(sorted(unknown))}\")\n\n    base_params = {k: limits[k][\"default\"] for k in limits}\n    base_params.update({k: _number(v, f\"base value of '{k}'\") for k, v in (base or {}).items()})\n    base_result = model.simulate(**base_params)  # an invalid base is the caller's error\n\n    bounds, scenarios = {}, []\n    for name in limits:  # model order, so colours and rows are stable\n        dev = deviations.get(name) or {}\n        down = _number(dev.get(\"down\", 0), f\"down % of '{name}'\")\n        up = _number(dev.get(\"up\", 0), f\"up % of '{name}'\")\n        if down < 0 or up < 0:\n            raise ValueError(f\"Deviations of '{name}' must be >= 0\")\n        if down > 100:\n            raise ValueError(f\"Down deviation of '{name}' cannot exceed 100%\")\n        value = base_params[name]\n        low, high, low_cap, high_cap = deviation_bounds(value, down, up, limits[name][\"min\"], limits[name][\"max\"])\n        bounds[name] = {\"value\": value, \"down_pct\": down, \"up_pct\": up, \"low\": low, \"high\": high,\n                        \"low_capped\": low_cap, \"high_capped\": high_cap}\n        for side, pct, x, capped in ((\"low\", down, low, low_cap), (\"high\", up, high, high_cap)):\n            if pct == 0 or x == value:\n                continue\n            params = dict(base_params, **{name: x})\n            result, error = _run(model, params)\n            scenarios.append({\n                \"id\": f\"{name}:{side}\",\n                \"label\": f\"{name} {'\u2212' if side == 'low' else '+'}{pct:g}%\" + (\" (capped)\" if capped else \"\"),\n                \"group\": name,\n                \"side\": side,\n                \"pct\": pct,\n                \"capped\": capped,\n                \"params\": params,\n                \"changed\": {name: x},\n                \"result\": result,\n                \"error\": error,\n                \"delta\": _delta(result, base_result) if result else None,\n            })\n    if len(scenarios) > MAX_SCENARIOS:\n        raise ValueError(f\"Too many scenarios ({len(scenarios)} > {MAX_SCENARIOS})\")\n    return {\"kind\": \"deviation_oat\", \"base\": base_result, \"bounds\": bounds, \"scenarios\": scenarios,\n            \"metrics\": [m for m, _ in METRICS]}\n\n\n# ----------------------------------------------------------------------------- registry\nEXPERIMENTS = {\n    \"deviation_oat\": {\n        \"run\": deviation_oat,\n        \"title\": \"Manual \u00b1 deviations (one at a time)\",\n        \"description\": \"Each parameter is moved to its lower and upper deviation, one at a time.\",\n        \"spec\": {\"deviations\": {\"<param>\": {\"down\": \"percent >= 0, <= 100\", \"up\": \"percent >= 0\"}}},\n    },\n    # Future kinds plug in here, e.g. \"grid\", \"sobol\", \"monte_carlo\".\n}\n\n\ndef kinds():\n    return {k: {kk: vv for kk, vv in v.items() if kk != \"run\"} for k, v in EXPERIMENTS.items()}\n\n\ndef run(model, kind, base, spec):\n    if kind not in EXPERIMENTS:\n        raise ValueError(f\"Unknown experiment kind '{kind}'. Available: {', '.join(EXPERIMENTS)}\")\n    return EXPERIMENTS[kind][\"run\"](model, base, spec)\n"
+          "lab.py": "\"\"\"\nlab.py \u2014 the public face of the Python side. Both transports load THIS module:\nthe Pyodide worker in the browser and FastAPI on the server.\n\n    model        : goodwin.py      (the mathematical model, editable in the browser)\n    experiments  : experiments.py  (model-agnostic exercises: sensitivity, sweeps, ...)\n    export       : export.py       (CSV files of an exercise: time series + parameters per run)\n    solvers      : solvers.py      (generic RK4 / RK45 integrators, used by the model)\n\nOnly the names in PUBLIC_FUNCTIONS can be called from the front end. Every function takes\nJSON-friendly keyword arguments and returns JSON-friendly values.\n\"\"\"\n\nimport experiments\nimport export\nimport goodwin as model\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\", \"experiment_kinds\", \"run_experiment\", \"export_csv\")\n\n\ndef describe():\n    return model.describe()\n\n\ndef equilibrium(**params):\n    return model.equilibrium(**params)\n\n\ndef simulate(**params):\n    return model.simulate(**params)\n\n\ndef experiment_kinds():\n    return experiments.kinds()\n\n\ndef run_experiment(kind=\"deviation_oat\", base=None, spec=None):\n    return experiments.run(model, kind, base or {}, spec or {})\n\n\ndef export_csv(kind=\"deviation_oat\", base=None, spec=None, samples=None):\n    \"\"\"Re-run the exercise exactly as shown (deterministic) and return its two CSV files.\n    With no deviations in `spec` this is the base run only (S00).\"\"\"\n    result = experiments.run(model, kind, base or {}, spec or {})\n    meta = model.describe()\n    names = [c[\"name\"] for c in meta.get(\"choices\", [])] + [p[\"name\"] for p in meta[\"parameters\"]]\n    return export.to_csv(result, names, samples)\n","goodwin.py": "\"\"\"\nGoodwin (1967) growth-cycle model \u2014 pure Python, no dependencies.\n\nThis module is the \"Python block\" of the app. It is deliberately free of any\nbrowser or server code, so the very same file runs:\n  * inside the browser (Pyodide, loaded by web/py-runtime.js), and\n  * on a server (imported by server/main.py with FastAPI).\n\nContract: every public function takes JSON-friendly keyword arguments and\nreturns JSON-friendly values (dict / list / float / str). Invalid input raises\nValueError, which both transports turn into an error message for the UI.\n\nModel (u = wage share, v = employment rate):\n    du/dt = u * (phi(v) - alpha)            phi(v) = -gamma + rho * v\n    dv/dt = v * ((1 - u) / sigma - alpha - beta)\n\n    alpha : labour-productivity growth rate\n    beta  : labour-force growth rate\n    sigma : capital-output ratio\n    gamma, rho : linear Phillips curve (wage growth vs. employment)\n\nInterior equilibrium:  v* = (alpha + gamma) / rho,  u* = 1 - sigma (alpha + beta)\nThe system is Lotka-Volterra-like and conserves\n    H(u, v) = u/sigma - a ln u + rho v - c ln v,  a = 1/sigma - alpha - beta, c = alpha + gamma\nso orbits are closed cycles; the drift of H measures numerical error.\n\nIntegration is done by solvers.py (RK4 fixed step, or RK45 adaptive with rtol/atol); this file\nonly supplies the right-hand side, the conserved quantity and the parameters.\n\"\"\"\n\nimport math\n\nimport solvers\n\nPUBLIC_FUNCTIONS = (\"describe\", \"equilibrium\", \"simulate\")\n\nMAX_STEPS = solvers.MAX_STEPS\nMAX_POINTS = 2_000          # RK4: output points kept per run (every step if fewer)\nDENSE_POINTS = 1_001        # RK45 dense output: uniform output grid\n\n_PARAMS = [\n    # name, label, default, min, max, step, group\n    (\"alpha\", \"Productivity growth \u03b1\", 0.02, 0.0, 0.10, 0.001, \"system\"),\n    (\"beta\", \"Labour-force growth \u03b2\", 0.01, 0.0, 0.10, 0.001, \"system\"),\n    (\"sigma\", \"Capital-output ratio \u03c3\", 3.0, 0.5, 8.0, 0.1, \"system\"),\n    (\"gamma\", \"Phillips intercept \u03b3\", 0.4, 0.0, 2.0, 0.01, \"phillips\"),\n    (\"rho\", \"Phillips slope \u03c1\", 0.5, 0.05, 3.0, 0.01, \"phillips\"),\n    (\"u0\", \"Initial wage share u\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"v0\", \"Initial employment v\u2080\", 0.88, 0.01, 1.5, 0.01, \"initial\"),\n    (\"t_max\", \"Horizon (years)\", 100.0, 1.0, 500.0, 1.0, \"experiment\"),\n    (\"dt\", \"Step size (years)\", 0.05, 0.001, 1.0, 0.001, \"experiment\"),\n    (\"rtol\", \"Relative tolerance\", 1e-8, 1e-12, 1e-3, 0.5, \"experiment\"),\n    (\"atol\", \"Absolute tolerance\", 1e-10, 1e-14, 1e-4, 0.5, \"experiment\"),\n]\n# extra metadata: log-scale sliders (step is then in decades) and which method a parameter applies to\n_EXTRA = {\n    \"dt\": {\"applies\": {\"method\": [\"rk4\"]}},\n    \"rtol\": {\"scale\": \"log\", \"applies\": {\"method\": [\"rk45\"]}},\n    \"atol\": {\"scale\": \"log\", \"applies\": {\"method\": [\"rk45\"]}},\n}\n\n# categorical settings (not varied by sensitivity exercises)\n_CHOICES = [\n    {\"name\": \"method\", \"label\": \"Integration method\", \"group\": \"experiment\", \"default\": \"rk4\",\n     \"options\": [{\"value\": \"rk4\", \"label\": \"RK4 \u00b7 fixed step\"},\n                 {\"value\": \"rk45\", \"label\": \"RK45 \u00b7 adaptive\"}]},\n    {\"name\": \"output\", \"label\": \"Output points\", \"group\": \"experiment\", \"default\": \"dense\",\n     \"applies\": {\"method\": [\"rk45\"]},\n     \"options\": [{\"value\": \"dense\", \"label\": \"Uniform grid\"},\n                 {\"value\": \"steps\", \"label\": \"Solver steps\"}]},\n    {\"name\": \"error_estimate\", \"label\": \"Global error estimate\", \"group\": \"experiment\", \"default\": \"on\",\n     \"options\": [{\"value\": \"on\", \"label\": \"On\"}, {\"value\": \"off\", \"label\": \"Off\"}]},\n]\n\n# What kind of quantity each group holds (the UI colours them differently):\n# system = structural parameters, initial = initial state, experiment = how the run is set up.\n_ROLES = {\"system\": \"system\", \"phillips\": \"system\", \"initial\": \"initial\", \"experiment\": \"experiment\"}\n\n\ndef describe():\n    \"\"\"Parameter metadata, so the UI can build its controls from Python.\"\"\"\n    return {\n        \"model\": \"Goodwin growth cycle\",\n        \"methods\": solvers.METHODS,\n        \"parameters\": [\n            {\"name\": n, \"label\": l, \"default\": d, \"min\": lo, \"max\": hi, \"step\": s, \"group\": g,\n             \"role\": _ROLES.get(g, \"system\"), **_EXTRA.get(n, {})}\n            for n, l, d, lo, hi, s, g in _PARAMS\n        ],\n        \"choices\": [dict(c, role=_ROLES.get(c[\"group\"], \"system\")) for c in _CHOICES],\n    }\n\n\ndef _defaults():\n    d = {p[0]: p[2] for p in _PARAMS}\n    d.update({c[\"name\"]: c[\"default\"] for c in _CHOICES})\n    return d\n\n\ndef _clean(params):\n    \"\"\"Merge with defaults, coerce and validate. Raises ValueError.\"\"\"\n    unknown = set(params) - set(_defaults())\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s): {', '.join(sorted(unknown))}\")\n    p = _defaults()\n    choices = {c[\"name\"]: {o[\"value\"] for o in c[\"options\"]} for c in _CHOICES}\n    for k, val in params.items():\n        if k in choices:\n            if val not in choices[k]:\n                raise ValueError(f\"'{k}' must be one of {', '.join(sorted(choices[k]))}, got {val!r}\")\n            p[k] = val\n            continue\n        try:\n            x = float(val)\n        except (TypeError, ValueError):\n            raise ValueError(f\"Parameter '{k}' must be a number, got {val!r}\")\n        if not math.isfinite(x):\n            raise ValueError(f\"Parameter '{k}' must be finite\")\n        p[k] = x\n    for k in (\"sigma\", \"rho\", \"u0\", \"v0\", \"t_max\", \"dt\", \"rtol\", \"atol\"):\n        if p[k] <= 0:\n            raise ValueError(f\"Parameter '{k}' must be > 0\")\n    for k in (\"alpha\", \"beta\", \"gamma\"):\n        if p[k] < 0:\n            raise ValueError(f\"Parameter '{k}' must be >= 0\")\n    if p[\"method\"] == \"rk4\" and p[\"t_max\"] / p[\"dt\"] > MAX_STEPS:\n        raise ValueError(f\"Too many steps (t_max/dt > {MAX_STEPS}); increase dt or reduce t_max\")\n    return p\n\n\ndef _eq(p):\n    u_star = 1.0 - p[\"sigma\"] * (p[\"alpha\"] + p[\"beta\"])\n    v_star = (p[\"alpha\"] + p[\"gamma\"]) / p[\"rho\"]\n    return u_star, v_star\n\n\ndef equilibrium(**params):\n    \"\"\"Interior equilibrium and small-oscillation period.\"\"\"\n    p = _clean(params)\n    u_star, v_star = _eq(p)\n    a = 1.0 / p[\"sigma\"] - p[\"alpha\"] - p[\"beta\"]\n    c = p[\"alpha\"] + p[\"gamma\"]\n    period = 2.0 * math.pi / math.sqrt(a * c) if a > 0 and c > 0 else None\n    return {\n        \"u_star\": u_star,\n        \"v_star\": v_star,\n        \"interior\": u_star > 0 and v_star > 0,\n        \"linear_period\": period,\n    }\n\n\ndef _system(p):\n    \"\"\"Right-hand side and conserved quantity for the solver (y = [u, v]).\"\"\"\n    gamma, rho, alpha, beta, sigma = p[\"gamma\"], p[\"rho\"], p[\"alpha\"], p[\"beta\"], p[\"sigma\"]\n    a = 1.0 / sigma - alpha - beta\n    c = alpha + gamma\n\n    def rhs(t, y):\n        u, v = y\n        return [u * (-gamma + rho * v - alpha), v * ((1.0 - u) / sigma - alpha - beta)]\n\n    def invariant(y):\n        u, v = y\n        if u <= 0 or v <= 0:\n            return None                      # left the domain: the solver reports instability\n        return u / sigma - a * math.log(u) + rho * v - c * math.log(v)\n\n    return rhs, invariant\n\n\ndef simulate(**params):\n    \"\"\"Integrate the model (RK4 or RK45). Returns time series, diagnostics and solver statistics.\"\"\"\n    p = _clean(params)\n    rhs, invariant = _system(p)\n    u_star, v_star = _eq(p)\n    n_out = MAX_POINTS if p[\"method\"] == \"rk4\" else DENSE_POINTS\n    run = solvers.integrate(rhs, [p[\"u0\"], p[\"v0\"]], p[\"t_max\"], p[\"method\"], p[\"dt\"], p[\"rtol\"], p[\"atol\"],\n                            p[\"output\"], n_out, watch=(0, u_star), invariant=invariant)\n    ts, (us, vs), st = run[\"t\"], run[\"y\"], run[\"stats\"]\n    if p[\"error_estimate\"] == \"on\":\n        st[\"global_error\"] = solvers.estimate_global_error(\n            rhs, [p[\"u0\"], p[\"v0\"]], p[\"t_max\"], run, p[\"method\"], p[\"dt\"], p[\"rtol\"], p[\"atol\"],\n            p[\"output\"], n_out)\n\n    cr = run[\"crossings\"]\n    period = (cr[-1] - cr[0]) / (len(cr) - 1) if len(cr) >= 2 else None\n\n    warnings = []\n    if max(vs) > 1.0:\n        warnings.append(\"Employment rate exceeds 100% on the orbit (v > 1).\")\n    if max(us) > 1.0:\n        warnings.append(\"Wage share exceeds 100% on the orbit (u > 1).\")\n    if u_star <= 0:\n        warnings.append(\"No interior equilibrium: u* \u2264 0 (\u03c3(\u03b1+\u03b2) \u2265 1).\")\n\n    return {\n        \"params\": p,\n        \"t\": ts,\n        \"u\": us,\n        \"v\": vs,\n        \"equilibrium\": {\"u_star\": u_star, \"v_star\": v_star},\n        \"summary\": {\n            \"steps\": st[\"steps\"],\n            \"u_min\": min(us), \"u_max\": max(us),\n            \"v_min\": min(vs), \"v_max\": max(vs),\n            \"period\": period,\n            \"invariant_drift\": st.get(\"invariant_drift\"),\n        },\n        \"solver\": st,\n        \"warnings\": warnings,\n    }\n","experiments.py": "\"\"\"\nexperiments.py \u2014 model-agnostic engine for simulation exercises (sensitivity, sweeps, ...).\n\nIt never draws anything and knows nothing about the UI. It works with any model module that\noffers the same contract as goodwin.py:\n\n    model.describe()  -> {\"parameters\": [{\"name\", \"min\", \"max\", \"default\", ...}, ...]}\n    model.simulate(**params) -> {\"summary\": {...}, \"equilibrium\": {...}, ...}\n\nEach exercise kind is a function registered in EXPERIMENTS. All of them take\n(model, base, spec) and return a JSON-friendly dict with at least:\n\n    {\"kind\": str, \"base_id\": \"S00\", \"base\": <simulate result>, \"scenarios\": [<scenario>, ...]}\n\nwhere every scenario is\n    {\"run_id\": \"S01\", \"id\", \"label\", \"params\": {...}, \"changed\": {...},\n     \"result\": <simulate result> | None, \"error\": {\"type\", \"message\"} | None,\n     \"delta\": {metric: scenario - base}}\n\nAdding a new kind (grid search, Sobol, Monte Carlo...) = write one function and register it;\nthe transport (Pyodide worker or FastAPI) and the front end's generic rendering do not change.\n\"\"\"\n\nimport math\n\n# Summary metrics compared against the base run (keys of simulate()[\"summary\"] / [\"equilibrium\"]).\nMETRICS = (\n    (\"period\", \"summary\"),\n    (\"u_min\", \"summary\"),\n    (\"u_max\", \"summary\"),\n    (\"v_min\", \"summary\"),\n    (\"v_max\", \"summary\"),\n    (\"u_star\", \"equilibrium\"),\n    (\"v_star\", \"equilibrium\"),\n)\n\nMAX_SCENARIOS = 64\n\n\ndef run_id(index):\n    \"\"\"Stable run identifier: S00 is the base run, S01, S02, ... the scenarios in order.\n    The same ids label the charts, the scenario table and every exported CSV.\"\"\"\n    return f\"S{index:02d}\"\n\n\n# ----------------------------------------------------------------------------- helpers\ndef _limits(model):\n    return {p[\"name\"]: p for p in model.describe()[\"parameters\"]}\n\n\ndef _metric(result, name, where):\n    value = result.get(where, {}).get(name)\n    return value if isinstance(value, (int, float)) and math.isfinite(value) else None\n\n\ndef _delta(result, base):\n    out = {}\n    for name, where in METRICS:\n        a, b = _metric(result, name, where), _metric(base, name, where)\n        out[name] = None if a is None or b is None else a - b\n    return out\n\n\ndef _run(model, params):\n    \"\"\"Run one simulation, capturing model errors so one bad scenario does not sink the rest.\"\"\"\n    try:\n        return model.simulate(**params), None\n    except (ValueError, ZeroDivisionError, OverflowError, ArithmeticError) as e:\n        return None, {\"type\": type(e).__name__, \"message\": str(e)}\n\n\ndef _number(value, what):\n    try:\n        x = float(value)\n    except (TypeError, ValueError):\n        raise ValueError(f\"{what} must be a number, got {value!r}\")\n    if not math.isfinite(x):\n        raise ValueError(f\"{what} must be finite\")\n    return x\n\n\ndef deviation_bounds(value, down_pct, up_pct, lo, hi):\n    \"\"\"\n    Interval [value - down%, value + up%] (percentages of |value|), clamped to [lo, hi].\n    Returns (low, high, low_capped, high_capped).\n    \"\"\"\n    span = abs(value)\n    low_raw = value - span * down_pct / 100.0\n    high_raw = value + span * up_pct / 100.0\n    low, high = max(low_raw, lo), min(high_raw, hi)\n    return low, high, low_raw < lo, high_raw > hi\n\n\n# ------------------------------------------------------------------- experiment kinds\ndef deviation_oat(model, base, spec):\n    \"\"\"\n    Manual sensitivity: for each parameter with a non-zero deviation, run one simulation at\n    value\u00b7(1 \u2212 down%) and one at value\u00b7(1 + up%), changing ONE parameter at a time (OAT),\n    the others held at the base values. Bounds are clamped to the parameter's [min, max].\n\n    spec = {\"deviations\": {\"alpha\": {\"down\": 10, \"up\": 20}, ...}}   (percent, default 0)\n    \"\"\"\n    limits = _limits(model)\n    deviations = (spec or {}).get(\"deviations\") or {}\n    if not isinstance(deviations, dict):\n        raise ValueError(\"spec.deviations must be an object {param: {down, up}}\")\n    unknown = set(deviations) - set(limits)\n    if unknown:\n        raise ValueError(f\"Unknown parameter(s) in deviations: {', '.join(sorted(unknown))}\")\n\n    choices = {c[\"name\"]: c[\"default\"] for c in model.describe().get(\"choices\", [])}\n    base_params = {k: limits[k][\"default\"] for k in limits}\n    base_params.update(choices)                  # categorical settings (method, \u2026) pass through as-is\n    for k, v in (base or {}).items():\n        base_params[k] = v if k in choices else _number(v, f\"base value of '{k}'\")\n    base_result = model.simulate(**base_params)  # an invalid base is the caller's error\n\n    bounds, scenarios = {}, []\n    for name in limits:  # model order, so colours and rows are stable\n        dev = deviations.get(name) or {}\n        down = _number(dev.get(\"down\", 0), f\"down % of '{name}'\")\n        up = _number(dev.get(\"up\", 0), f\"up % of '{name}'\")\n        if down < 0 or up < 0:\n            raise ValueError(f\"Deviations of '{name}' must be >= 0\")\n        if down > 100:\n            raise ValueError(f\"Down deviation of '{name}' cannot exceed 100%\")\n        value = base_params[name]\n        low, high, low_cap, high_cap = deviation_bounds(value, down, up, limits[name][\"min\"], limits[name][\"max\"])\n        bounds[name] = {\"value\": value, \"down_pct\": down, \"up_pct\": up, \"low\": low, \"high\": high,\n                        \"low_capped\": low_cap, \"high_capped\": high_cap}\n        for side, pct, x, capped in ((\"low\", down, low, low_cap), (\"high\", up, high, high_cap)):\n            if pct == 0 or x == value:\n                continue\n            params = dict(base_params, **{name: x})\n            result, error = _run(model, params)\n            scenarios.append({\n                \"run_id\": run_id(len(scenarios) + 1),\n                \"id\": f\"{name}:{side}\",\n                \"label\": f\"{name} {'\u2212' if side == 'low' else '+'}{pct:g}%\" + (\" (capped)\" if capped else \"\"),\n                \"group\": name,\n                \"side\": side,\n                \"pct\": pct,\n                \"capped\": capped,\n                \"params\": params,\n                \"changed\": {name: x},\n                \"result\": result,\n                \"error\": error,\n                \"delta\": _delta(result, base_result) if result else None,\n            })\n    if len(scenarios) > MAX_SCENARIOS:\n        raise ValueError(f\"Too many scenarios ({len(scenarios)} > {MAX_SCENARIOS})\")\n    return {\"kind\": \"deviation_oat\", \"base_id\": run_id(0), \"base\": base_result, \"bounds\": bounds,\n            \"scenarios\": scenarios, \"metrics\": [m for m, _ in METRICS]}\n\n\n# ----------------------------------------------------------------------------- registry\nEXPERIMENTS = {\n    \"deviation_oat\": {\n        \"run\": deviation_oat,\n        \"title\": \"Manual \u00b1 deviations (one at a time)\",\n        \"description\": \"Each parameter is moved to its lower and upper deviation, one at a time.\",\n        \"spec\": {\"deviations\": {\"<param>\": {\"down\": \"percent >= 0, <= 100\", \"up\": \"percent >= 0\"}}},\n    },\n    # Future kinds plug in here, e.g. \"grid\", \"sobol\", \"monte_carlo\".\n}\n\n\ndef kinds():\n    return {k: {kk: vv for kk, vv in v.items() if kk != \"run\"} for k, v in EXPERIMENTS.items()}\n\n\ndef run(model, kind, base, spec):\n    if kind not in EXPERIMENTS:\n        raise ValueError(f\"Unknown experiment kind '{kind}'. Available: {', '.join(EXPERIMENTS)}\")\n    return EXPERIMENTS[kind][\"run\"](model, base, spec)\n","export.py": "\"\"\"\nexport.py \u2014 turns a simulation exercise into CSV files. Model-agnostic, no UI code.\n\nTwo files share the same run ids (S00 = base run, S01... = scenarios, see experiments.run_id):\n\n  time series   long format, one row per run and sample point:\n                run_id, sample, t, <every solution variable of the model>\n  parameters    one row per run: run_id, scenario, varied_param, side, deviation_pct,\n                capped, status, error, solver statistics (method, steps, rejected, f_evals,\n                h_min, h_max, global_error_est, invariant_drift), then every model setting\n                and parameter in describe() order\n\n\"Solution variables\" are the lists in a simulate() result that have one value per time point\n(for the Goodwin model: u and v). Rows are actual solver output points, never interpolated:\n`samples` points are picked at evenly spaced indices of each run's trajectory.\n\"\"\"\n\nimport csv\nimport io\n\n\ndef sample_indices(n, samples):\n    \"\"\"`samples` evenly spaced indices in range(n), always including the first and last.\n    samples=None or >= n gives every index.\"\"\"\n    if n <= 0:\n        return []\n    if samples is None or samples >= n:\n        return list(range(n))\n    if samples < 2:\n        raise ValueError(\"samples must be at least 2\")\n    return sorted({round(i * (n - 1) / (samples - 1)) for i in range(samples)})\n\n\ndef solution_variables(result):\n    \"\"\"Names of the per-time-point series in a simulate() result, in result order (t excluded).\"\"\"\n    n = len(result.get(\"t\", []))\n    return [k for k, v in result.items() if k != \"t\" and isinstance(v, list) and len(v) == n and n]\n\n\ndef _runs(experiment):\n    \"\"\"(run_id, scenario dict | None, result | None) for the base run and every scenario.\"\"\"\n    yield experiment.get(\"base_id\", \"S00\"), None, experiment[\"base\"]\n    for sc in experiment.get(\"scenarios\", []):\n        yield sc[\"run_id\"], sc, sc.get(\"result\")\n\n\nSOLVER_COLUMNS = (\"solver_method\", \"steps\", \"rejected\", \"f_evals\", \"h_min\", \"h_max\",\n                  \"global_error_est\", \"invariant_drift\")\n\n\ndef _solver_cells(result):\n    st = (result or {}).get(\"solver\") or {}\n    ge = st.get(\"global_error\") or {}\n    return [st.get(\"method\", \"\"), st.get(\"steps\", \"\"), st.get(\"rejected\", \"\"), st.get(\"f_evals\", \"\"),\n            st.get(\"h_min\", \"\"), st.get(\"h_max\", \"\"), ge.get(\"max_abs\", \"\"), st.get(\"invariant_drift\", \"\")]\n\n\ndef _csv(rows, header):\n    buf = io.StringIO()\n    w = csv.writer(buf, lineterminator=\"\\n\")\n    w.writerow(header)\n    w.writerows(rows)\n    return buf.getvalue()\n\n\ndef to_csv(experiment, param_names, samples=None):\n    \"\"\"Build both CSV files from a run_experiment() result. Returns a JSON-friendly dict.\"\"\"\n    if samples is not None:\n        try:\n            samples = int(samples)\n        except (TypeError, ValueError):\n            raise ValueError(f\"samples must be an integer, got {samples!r}\")\n    base = experiment[\"base\"]\n    variables = solution_variables(base)\n    available = len(base[\"t\"])\n\n    ts_rows, par_rows, written = [], [], 0\n    for rid, sc, result in _runs(experiment):\n        params = result[\"params\"] if result else sc[\"params\"]\n        if sc is None:\n            meta = [\"base\", \"\", \"\", 0, False]\n        else:\n            name = next(iter(sc[\"changed\"]))\n            meta = [sc[\"label\"], name, sc[\"side\"], sc[\"pct\"], sc[\"capped\"]]\n        status = \"ok\" if result else \"error\"\n        error = \"\" if result else f'{sc[\"error\"][\"type\"]}: {sc[\"error\"][\"message\"]}'\n        par_rows.append([rid, *meta, status, error, *_solver_cells(result),\n                         *[params.get(k, \"\") for k in param_names]])\n        if not result:\n            continue\n        idx = sample_indices(len(result[\"t\"]), samples)\n        written = max(written, len(idx))\n        for j, i in enumerate(idx):\n            ts_rows.append([rid, j, result[\"t\"][i], *[result[v][i] for v in variables]])\n\n    return {\n        \"timeseries_csv\": _csv(ts_rows, [\"run_id\", \"sample\", \"t\", *variables]),\n        \"parameters_csv\": _csv(par_rows, [\"run_id\", \"scenario\", \"varied_param\", \"side\", \"deviation_pct\",\n                                          \"capped\", \"status\", \"error\", *SOLVER_COLUMNS, *param_names]),\n        \"runs\": len(par_rows),\n        \"failed_runs\": sum(1 for r in par_rows if r[6] == \"error\"),\n        \"variables\": variables,\n        \"available_points\": available,\n        \"samples_per_run\": written,\n        \"timeseries_rows\": len(ts_rows),\n    }\n","solvers.py": "\"\"\"\nsolvers.py \u2014 generic ODE integrators in pure Python (no NumPy), shared by every model.\n\nTwo methods, chosen by the caller:\n\n  rk4    classical 4th-order Runge\u2013Kutta, fixed step dt. Local error O(dt^5), global O(dt^4).\n         No error control: the step is what you choose.\n  rk45   Dormand\u2013Prince 5(4) with adaptive step (the method behind SciPy's solve_ivp \"RK45\").\n         Each step computes a 5th-order solution and an embedded 4th-order one; their difference\n         estimates the local error. A step is accepted when\n             ||err / (atol + rtol\u00b7max(|y|, |y_new|))||_RMS <= 1\n         and the next step size follows h\u00b70.9\u00b7||\u00b7||^(\u22121/5), limited to [0.2, 10]\u00d7h.\n         A 4th-order continuous extension (\"dense output\") gives the solution between steps.\n\nBoth return the same structure, so a model only supplies its right-hand side:\n\n    integrate(rhs, y0, t_end, method, dt, rtol, atol, output, n_out, watch=None, invariant=None)\n      -> {\"t\": [...], \"y\": [[...] per component], \"stats\": {...}, \"crossings\": [...]}\n\nGlobal error estimate (estimate_global_error): the same problem is re-solved with tighter\ncontrol (rk4: dt/2; rk45: rtol/10, atol/10) and compared at the output times. For rk4 the\nRichardson factor 16/15 turns the difference into an estimate of the current run's error.\n\"\"\"\n\nimport math\n\nMAX_STEPS = 200_000\nMAX_SERIES = 600            # points kept of the step-size history h(t)\n\n# ------------------------------------------------------------------ Dormand\u2013Prince tableau\n_C = (0.0, 1 / 5, 3 / 10, 4 / 5, 8 / 9, 1.0)\n_A = (\n    (),\n    (1 / 5,),\n    (3 / 40, 9 / 40),\n    (44 / 45, -56 / 15, 32 / 9),\n    (19372 / 6561, -25360 / 2187, 64448 / 6561, -212 / 729),\n    (9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656),\n)\n_B = (35 / 384, 0.0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84)\n# error weights: (embedded 4th order) \u2212 (5th order), applied to the 7 stages (FSAL stage last)\n_E = (-71 / 57600, 0.0, 71 / 16695, -71 / 1920, 17253 / 339200, -22 / 525, 1 / 40)\n# dense output (Shampine's quartic interpolant, as in SciPy): y(t+\u03b8h) = y + h\u00b7\u03a3_j Q_j \u03b8^(j+1)\n_P = (\n    (1.0, -8048581381 / 2820520608, 8663915743 / 2820520608, -12715105075 / 11282082432),\n    (0.0, 0.0, 0.0, 0.0),\n    (0.0, 131558114200 / 32700410799, -68118460800 / 10900136933, 87487479700 / 32700410799),\n    (0.0, -1754552775 / 470086768, 14199869525 / 1410260304, -10690763975 / 1880347072),\n    (0.0, 127303824393 / 49829197408, -318862633887 / 49829197408, 701980252875 / 199316789632),\n    (0.0, -282668133 / 205662961, 2019193451 / 616988883, -1453857185 / 822651844),\n    (0.0, 40617522 / 29380423, -110615467 / 29380423, 69997945 / 29380423),\n)\n_SAFETY, _MIN_FACTOR, _MAX_FACTOR = 0.9, 0.2, 10.0\n\nMETHODS = {\n    \"rk4\": \"RK4 \u00b7 fixed step\",\n    \"rk45\": \"RK45 \u00b7 Dormand\u2013Prince, adaptive\",\n}\n\n\nclass IntegrationError(ValueError):\n    \"\"\"The integration could not be completed (instability, step underflow, too many steps).\"\"\"\n\n\ndef _finite_positive(y):\n    return all(math.isfinite(x) for x in y)\n\n\ndef _rms(v):\n    return math.sqrt(sum(x * x for x in v) / len(v))\n\n\n# --------------------------------------------------------------------------- watchers\nclass _Watch:\n    \"\"\"Tracks upward crossings of y[index] through `level` (used for the cycle period).\"\"\"\n\n    def __init__(self, index, level):\n        self.i, self.level, self.times = index, level, []\n\n    def check(self, t0, y0, t1, y1, interp=None):\n        a, b = y0[self.i] - self.level, y1[self.i] - self.level\n        if a < 0 <= b:\n            if interp is None:                    # linear within a small fixed step\n                self.times.append(t0 + (t1 - t0) * (-a) / (b - a))\n                return\n            lo, hi = 0.0, 1.0                     # bisection on the dense interpolant\n            for _ in range(40):\n                mid = 0.5 * (lo + hi)\n                if interp(mid)[self.i] - self.level < 0:\n                    lo = mid\n                else:\n                    hi = mid\n            self.times.append(t0 + (t1 - t0) * 0.5 * (lo + hi))\n\n\n# ---------------------------------------------------------------------------- RK4\ndef _rk4(rhs, y0, t_end, dt, n_out, watch, invariant):\n    n = int(round(t_end / dt))\n    if n < 1:\n        raise IntegrationError(\"t_max must be at least one step long\")\n    if n > MAX_STEPS:\n        raise IntegrationError(f\"Too many steps (t_max/dt > {MAX_STEPS}); increase dt or reduce t_max\")\n    stride = max(1, math.ceil((n + 1) / n_out))\n    dim = len(y0)\n    y = list(y0)\n    ts, ys = [0.0], [[v] for v in y]\n    h0 = invariant(y) if invariant else None\n    drift = 0.0\n    h2, h6 = dt / 2, dt / 6\n    for i in range(1, n + 1):\n        t = (i - 1) * dt\n        k1 = rhs(t, y)\n        k2 = rhs(t + h2, [a + h2 * b for a, b in zip(y, k1)])\n        k3 = rhs(t + h2, [a + h2 * b for a, b in zip(y, k2)])\n        k4 = rhs(t + dt, [a + dt * b for a, b in zip(y, k3)])\n        yn = [a + h6 * (b1 + 2 * b2 + 2 * b3 + b4) for a, b1, b2, b3, b4 in zip(y, k1, k2, k3, k4)]\n        if not _finite_positive(yn):\n            raise IntegrationError(f\"Integration became unstable at t={i * dt:.3f}; try a smaller dt\")\n        if watch:\n            watch.check(t, y, i * dt, yn)\n        y = yn\n        if invariant:\n            hv = invariant(y)\n            if hv is None:\n                raise IntegrationError(f\"Integration left the model's domain at t={i * dt:.3f}; try a smaller dt\")\n            drift = max(drift, abs(hv - h0))\n        if i % stride == 0 or i == n:\n            ts.append(i * dt)\n            for j in range(dim):\n                ys[j].append(y[j])\n    stats = {\n        \"method\": \"rk4\", \"steps\": n, \"rejected\": 0, \"f_evals\": 4 * n,\n        \"h_min\": dt, \"h_max\": dt, \"h_mean\": dt,\n        \"h_series\": {\"t\": [0.0, n * dt], \"h\": [dt, dt]},\n        \"output\": \"steps\", \"output_points\": len(ts),\n    }\n    if invariant:\n        stats[\"invariant_drift\"] = drift / abs(h0) if h0 else drift\n    return ts, ys, stats\n\n\n# --------------------------------------------------------------------------- RK45\ndef _initial_step(rhs, t0, y0, f0, t_end, rtol, atol):\n    \"\"\"Hairer\u2013N\u00f8rsett\u2013Wanner starting-step heuristic (as in SciPy).\"\"\"\n    scale = [atol + abs(v) * rtol for v in y0]\n    d0 = _rms([y0[i] / scale[i] for i in range(len(y0))])\n    d1 = _rms([f0[i] / scale[i] for i in range(len(y0))])\n    h0 = 1e-6 if d0 < 1e-5 or d1 < 1e-5 else 0.01 * d0 / d1\n    h0 = min(h0, t_end - t0)\n    y1 = [y0[i] + h0 * f0[i] for i in range(len(y0))]\n    f1 = rhs(t0 + h0, y1)\n    d2 = _rms([(f1[i] - f0[i]) / scale[i] for i in range(len(y0))]) / h0\n    h1 = max(1e-6, h0 * 1e-3) if d1 <= 1e-15 and d2 <= 1e-15 else (0.01 / max(d1, d2)) ** (1 / 5)\n    return min(100 * h0, h1, t_end - t0)\n\n\ndef _rk45(rhs, y0, t_end, rtol, atol, output, n_out, watch, invariant, t_eval=None):\n    dim = len(y0)\n    t, y = 0.0, list(y0)\n    f = rhs(t, y)\n    f_evals = 1\n    h = _initial_step(rhs, t, y, f, t_end, rtol, atol)\n    f_evals += 1\n    if t_eval is not None:                       # dense output at given times (t_eval[0] must be 0)\n        grid, n_out = list(t_eval), len(t_eval)\n    else:\n        grid = [t_end * k / (n_out - 1) for k in range(n_out)] if output == \"dense\" else None\n    gi = 1\n    ts, ys = [0.0], [[v] for v in y]\n    hs_t, hs_h = [], []\n    accepted = rejected = 0\n    h_min, h_max, h_sum = math.inf, 0.0, 0.0\n    err_max = 0.0\n    inv0 = invariant(y) if invariant else None\n    drift = 0.0\n\n    while t < t_end:\n        if accepted + rejected > MAX_STEPS:\n            raise IntegrationError(f\"Too many steps (> {MAX_STEPS}); loosen rtol/atol or reduce t_max\")\n        h = min(h, t_end - t)\n        if h < 1e-12 * max(1.0, abs(t)):\n            raise IntegrationError(f\"Step size underflow at t={t:.4f}; the problem may be stiff or singular\")\n        K = [f]\n        for s in range(1, 6):\n            a = _A[s]\n            K.append(rhs(t + _C[s] * h, [yi + h * sum(c * kj for c, kj in zip(a, col))\n                                         for yi, col in zip(y, zip(*K))]))\n        yn = [yi + h * sum(c * kj for c, kj in zip(_B, col)) for yi, col in zip(y, zip(*K))]\n        fn = rhs(t + h, yn)\n        K.append(fn)\n        f_evals += 6\n        if not _finite_positive(yn):\n            rejected += 1\n            h *= _MIN_FACTOR\n            continue\n        scale = [atol + rtol * max(abs(y[i]), abs(yn[i])) for i in range(dim)]\n        err = _rms([h * sum(c * kj for c, kj in zip(_E, col)) / sc for col, sc in zip(zip(*K), scale)])\n        if err > 1.0:\n            rejected += 1\n            h *= max(_MIN_FACTOR, _SAFETY * err ** (-1 / 5))\n            continue\n\n        # accepted step ------------------------------------------------------\n        Q = [[sum(K[j][i] * _P[j][c] for j in range(7)) for c in range(4)] for i in range(dim)]\n        t0, y0s, hh = t, y, h\n\n        def interp(theta, y0s=y0s, Q=Q, hh=hh):\n            p = (theta, theta ** 2, theta ** 3, theta ** 4)\n            return [y0s[i] + hh * sum(Q[i][c] * p[c] for c in range(4)) for i in range(dim)]\n\n        if watch:\n            watch.check(t0, y0s, t0 + hh, yn, interp)\n        t, y, f = t + h, yn, fn\n        accepted += 1\n        err_max = max(err_max, err)\n        h_min, h_max, h_sum = min(h_min, h), max(h_max, h), h_sum + h\n        hs_t.append(t0)\n        hs_h.append(h)\n        if invariant:\n            hv = invariant(y)\n            if hv is None:\n                raise IntegrationError(f\"Integration left the model's domain at t={t:.3f}; tighten rtol\")\n            drift = max(drift, abs(hv - inv0))\n        if grid is None:\n            ts.append(t)\n            for i in range(dim):\n                ys[i].append(y[i])\n        else:\n            while gi < n_out and grid[gi] <= t + 1e-12 * t_end:\n                yg = y if abs(grid[gi] - t) <= 1e-12 * t_end else interp((grid[gi] - t0) / hh)\n                ts.append(grid[gi])\n                for i in range(dim):\n                    ys[i].append(yg[i])\n                gi += 1\n        factor = _MAX_FACTOR if err == 0 else min(_MAX_FACTOR, _SAFETY * err ** (-1 / 5))\n        h *= factor\n\n    if grid is None and t_eval is None and len(ts) > n_out:            # keep payloads small: thin to n_out solver steps\n        keep = sorted({round(k * (len(ts) - 1) / (n_out - 1)) for k in range(n_out)})\n        ts = [ts[k] for k in keep]\n        ys = [[col[k] for k in keep] for col in ys]\n    stride = max(1, math.ceil(len(hs_t) / MAX_SERIES))\n    stats = {\n        \"method\": \"rk45\", \"steps\": accepted, \"rejected\": rejected, \"f_evals\": f_evals,\n        \"h_min\": h_min, \"h_max\": h_max, \"h_mean\": h_sum / max(1, accepted),\n        \"max_local_error_ratio\": err_max,\n        \"h_series\": {\"t\": hs_t[::stride], \"h\": hs_h[::stride]},\n        \"output\": output, \"output_points\": len(ts),\n    }\n    if invariant:\n        stats[\"invariant_drift\"] = drift / abs(inv0) if inv0 else drift\n    return ts, ys, stats\n\n\n# ------------------------------------------------------------------------ public API\ndef integrate(rhs, y0, t_end, method=\"rk4\", dt=0.05, rtol=1e-8, atol=1e-10,\n              output=\"dense\", n_out=1001, watch=None, invariant=None, t_eval=None):\n    \"\"\"\n    rhs(t, y) -> dy/dt (lists). Returns {\"t\", \"y\", \"stats\", \"crossings\"}.\n    watch = (component index, level): upward crossing times are returned in \"crossings\".\n    invariant(y) -> float | None: tracked for drift; None means y left the model's domain.\n    \"\"\"\n    w = _Watch(*watch) if watch else None\n    if method == \"rk4\":\n        ts, ys, stats = _rk4(rhs, y0, t_end, dt, n_out, w, invariant)\n    elif method == \"rk45\":\n        if output not in (\"dense\", \"steps\"):\n            raise ValueError(\"output must be 'dense' or 'steps'\")\n        ts, ys, stats = _rk45(rhs, y0, t_end, rtol, atol, output, n_out, w, invariant, t_eval)\n    else:\n        raise ValueError(f\"Unknown method '{method}'. Available: {', '.join(METHODS)}\")\n    stats[\"label\"] = METHODS[method]\n    return {\"t\": ts, \"y\": ys, \"stats\": stats, \"crossings\": w.times if w else []}\n\n\ndef _values_at(t_query, ts, ys):\n    \"\"\"Values of a run at the requested times (exact match or linear between output points).\"\"\"\n    out, k = [], 0\n    for tq in t_query:\n        while k + 1 < len(ts) and ts[k + 1] < tq - 1e-12:\n            k += 1\n        if abs(ts[k] - tq) <= 1e-9 * max(1.0, abs(tq)) or k + 1 >= len(ts):\n            out.append([col[k] for col in ys])\n        else:\n            a = (tq - ts[k]) / (ts[k + 1] - ts[k])\n            out.append([col[k] + a * (col[k + 1] - col[k]) for col in ys])\n    return out\n\n\ndef estimate_global_error(rhs, y0, t_end, run, method, dt, rtol, atol, output, n_out):\n    \"\"\"\n    Re-solve with tighter control and compare at the run's output times.\n      rk4 : dt/2 (same output times exactly); estimate = |\u0394|\u00b716/15 (Richardson, order 4)\n      rk45: rtol/10, atol/10, dense output evaluated at the run's own times; estimate = |\u0394|\n    Returns {\"max_abs\", \"final_abs\", \"by_component\": [...], \"reference\", \"factor\"} or\n    {\"skipped\": reason} when the refined run would be too expensive or fails.\n    \"\"\"\n    try:\n        if method == \"rk4\":\n            if 2 * round(t_end / dt) > MAX_STEPS:\n                return {\"skipped\": f\"reference run with dt/2 would exceed {MAX_STEPS:,} steps\"}\n            ref = integrate(rhs, y0, t_end, \"rk4\", dt / 2, n_out=10 ** 9)   # keep every step\n            factor, how = 16 / 15, \"same problem with dt/2, Richardson factor 16/15\"\n        else:\n            # reference evaluated exactly at the run's output times with its own dense output\n            ref = integrate(rhs, y0, t_end, \"rk45\", rtol=rtol / 10, atol=atol / 10, t_eval=run[\"t\"])\n            factor, how = 1.0, \"same problem with rtol/10 and atol/10\"\n    except ValueError as e:\n        return {\"skipped\": f\"reference run failed: {e}\"}\n    vals = _values_at(run[\"t\"], ref[\"t\"], ref[\"y\"])\n    dim = len(run[\"y\"])\n    by = [0.0] * dim\n    for k, row in enumerate(vals):\n        for i in range(dim):\n            by[i] = max(by[i], abs(run[\"y\"][i][k] - row[i]) * factor)\n    final = max(abs(run[\"y\"][i][-1] - vals[-1][i]) * factor for i in range(dim))\n    return {\"max_abs\": max(by), \"final_abs\": final, \"by_component\": by,\n            \"reference\": how, \"reference_f_evals\": ref[\"stats\"][\"f_evals\"]}\n"
         },
         entryModule: "lab",
         editableFile: "goodwin.py",
@@ -1058,7 +1253,7 @@ body.sens-on .seg { display: inline-flex; }
 
   const CHIPS = [5, 10, 25, 50];   // symmetric ±% presets
 
-  function create({ onChange, setParam = () => {} }) {
+  function create({ onChange, setParam = () => {}, isActive = () => true }) {
     const state = {
       enabled: false,
       kind: "deviation_oat",
@@ -1074,7 +1269,11 @@ body.sens-on .seg { display: inline-flex; }
       const step = (state.meta[name] && state.meta[name].step) || 0.01;
       return Math.min(6, Math.max(0, (String(step).split(".")[1] || "").length) + 1);
     };
-    const fmt = (name, x) => (x == null ? "—" : Number(x).toFixed(digits(name)));
+    const fmt = (name, x) => {
+      if (x == null) return "—";
+      const p = state.meta[name];
+      return p && p.scale === "log" ? Number(x).toExponential(2) : Number(x).toFixed(digits(name));
+    };
 
     /* ---------------------------------------------------------------- controls */
     function setEnabled(on) {
@@ -1167,7 +1366,8 @@ body.sens-on .seg { display: inline-flex; }
       if (!state.enabled) return null;
       const deviations = {};
       for (const [k, d] of Object.entries(state.deviations)) {
-        if (k in baseParams && (d.down > 0 || d.up > 0)) deviations[k] = { down: d.down, up: d.up };
+        // parameters the current method ignores (e.g. dt under RK45) are left out
+        if (k in baseParams && isActive(k) && (d.down > 0 || d.up > 0)) deviations[k] = { down: d.down, up: d.up };
       }
       return { fn: "run_experiment", args: { kind: state.kind, base: baseParams, spec: { deviations } } };
     }
@@ -1196,11 +1396,13 @@ body.sens-on .seg { display: inline-flex; }
           if (label) label.textContent = "";
           continue;
         }
-        const span = p.max - p.min || 1;
-        const pos = (x) => `calc(8px + ${(x - p.min) / span} * (100% - 16px))`;
+        // position along the track; log-scale parameters (tolerances) are placed in decades
+        const f = (x) => (p.scale === "log" ? Math.log10(x) : x);
+        const span = f(p.max) - f(p.min) || 1;
+        const pos = (x) => `calc(8px + ${(f(x) - f(p.min)) / span} * (100% - 16px))`;
         // the thumb centre travels between 8px from each edge of a native range input
         band.style.left = pos(b.low);
-        band.style.width = `calc(${(b.high - b.low) / span} * (100% - 16px))`;
+        band.style.width = `calc(${(f(b.high) - f(b.low)) / span} * (100% - 16px))`;
         mark.style.left = pos(b.value);
         band.classList.toggle("cap-low", !!b.low_capped);
         band.classList.toggle("cap-high", !!b.high_capped);
@@ -1226,20 +1428,20 @@ body.sens-on .seg { display: inline-flex; }
       const swatch = (color, dash) =>
         `<svg width="28" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="${esc(color)}"
           stroke-width="${dash ? 2 : 3}" ${dash ? 'stroke-dasharray="5 3"' : ""}/></svg>`;
-      const head = `<tr><th></th><th>Scenario</th><th>Value</th><th>Period</th><th>Δ period</th>
+      const head = `<tr><th></th><th>ID</th><th>Scenario</th><th>Value</th><th>Period</th><th>Δ period</th>
         <th>u range</th><th>v range</th><th>Δ u*</th></tr>`;
-      const baseRow = `<tr class="base"><td>${swatch(css("--ink"), false)}</td><td>Base</td><td>—</td>
+      const baseRow = `<tr class="base"><td>${swatch(css("--ink"), false)}</td><td>${esc(result.base_id || "S00")}</td><td>Base</td><td>—</td>
         <td>${f(base.summary.period, 2)}</td><td>—</td>
         <td>${f(base.summary.u_min)}–${f(base.summary.u_max)}</td><td>${f(base.summary.v_min)}–${f(base.summary.v_max)}</td><td>—</td></tr>`;
       const body = rows.map((s) => {
         const c = colorFor(s);
         const name = Object.keys(s.changed)[0];
         if (s.error) {
-          return `<tr class="err"><td>${swatch(c.color, c.dash.length)}</td><td>${esc(s.label)}</td>
+          return `<tr class="err"><td>${swatch(c.color, c.dash.length)}</td><td>${esc(s.run_id)}</td><td>${esc(s.label)}</td>
             <td>${esc(fmt(name, s.changed[name]))}</td><td colspan="5">${esc(s.error.type)}: ${esc(s.error.message)}</td></tr>`;
         }
         const r = s.result.summary, d = s.delta;
-        return `<tr><td>${swatch(c.color, c.dash.length)}</td><td>${esc(s.label)}</td>
+        return `<tr><td>${swatch(c.color, c.dash.length)}</td><td>${esc(s.run_id)}</td><td>${esc(s.label)}</td>
           <td>${esc(fmt(name, s.changed[name]))}</td><td>${f(r.period, 2)}</td><td>${sd(d.period, 2)}</td>
           <td>${f(r.u_min)}–${f(r.u_max)}</td><td>${f(r.v_min)}–${f(r.v_max)}</td><td>${sd(d.u_star)}</td></tr>`;
       }).join("");
@@ -1278,6 +1480,377 @@ body.sens-on .seg { display: inline-flex; }
 </script>
   <script>
 /*
+ * output.js — "Output results" panel: run index and CSV export (UI only, no numerics).
+ *
+ * The CSV files are built in Python (core/export.py, via lab.export_csv) from the same
+ * exercise the charts show, so the run ids (S00 base, S01… scenarios) match everywhere:
+ * chart legends, the scenario table, timeseries.csv and parameters.csv.
+ *
+ * Saving: inside the claude.ai viewer the page asks the `downloads` capability (the viewer
+ * confirms); everywhere else it uses an ordinary browser download. A preview with Copy
+ * buttons is always available as a fallback.
+ */
+(function (global) {
+  "use strict";
+
+  const esc = (x) => String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const PRESETS = [11, 101, 501];
+  const PREVIEW_LINES = 8;
+
+  /* Save a text file: viewer-confirmed download in claude.ai, plain browser download elsewhere. */
+  async function saveText(filename, text) {
+    if (global.claude && typeof global.claude.use === "function") {
+      const downloads = await global.claude.use("downloads").catch(() => null);
+      if (downloads) {
+        await downloads.save({ filename, data: text });
+        return "saved";
+      }
+    }
+    const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+    const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return "downloaded";
+  }
+
+  function stamp() {
+    const d = new Date(), p = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
+  }
+
+  /*
+   * api: the PyApi instance. currentRequest(): {kind, base, spec} describing what is on screen.
+   * colorFor(scenario): the colour/dash the charts use for a scenario.
+   */
+  function create({ api, currentRequest, colorFor, css }) {
+    const $ = (id) => document.getElementById(id);
+    const state = { available: 0, tMax: 0, last: null, files: null };
+
+    function samples() {
+      if ($("out-all").checked) return null;
+      const n = Math.round(Number($("out-samples").value));
+      return Number.isFinite(n) ? Math.max(2, Math.min(n, state.available || n)) : 101;
+    }
+
+    function describeSampling() {
+      const k = samples();
+      const n = state.available;
+      if (!n) return;
+      const every = k == null ? 1 : (n - 1) / (k - 1);
+      const dt = state.tMax / Math.max(1, n - 1);
+      const spacing = state.uneven ? "uneven spacing" : `about every ${(every * dt).toPrecision(3)} y`;
+      $("out-sampling").textContent = k == null
+        ? `all ${n.toLocaleString()} output points per run (${state.uneven ? "uneven spacing" : `every ${dt.toPrecision(3)} y`})`
+        : `${k.toLocaleString()} of ${n.toLocaleString()} output points per run, ${spacing}`;
+      $("out-samples").disabled = k == null;
+      document.querySelectorAll(".out-preset").forEach((b) =>
+        b.setAttribute("aria-pressed", String(k != null && Number(b.dataset.n) === k)));
+    }
+
+    /* Called after every run with the base result and the experiment (or null). */
+    function update(res, experiment) {
+      state.available = res.t.length;
+      state.uneven = !!(res.solver && res.solver.method === "rk45" && res.solver.output === "steps");
+      state.tMax = res.t[res.t.length - 1];
+      state.files = null;                      // anything prepared before is now stale
+      const input = $("out-samples");
+      input.max = state.available;
+      if (Number(input.value) > state.available) input.value = state.available;
+
+      const runs = [{ run_id: (experiment && experiment.base_id) || "S00", label: "base", base: true }]
+        .concat(experiment ? experiment.scenarios : []);
+      const failed = runs.filter((r) => r.error).length;
+      $("out-summary").textContent =
+        `${runs.length} run${runs.length === 1 ? "" : "s"}` +
+        (runs.length > 1 ? ` (${runs[0].run_id}–${runs[runs.length - 1].run_id})` : ` (${runs[0].run_id})`) +
+        (failed ? ` · ${failed} failed` : "") +
+        ` · variables t, u, v · ${state.available.toLocaleString()} output points each`;
+
+      $("out-runs").innerHTML = runs.map((r) => {
+        const c = r.base ? { color: css("--ink"), dash: [] } : colorFor(r);
+        const dash = c.dash && c.dash.length ? 'stroke-dasharray="4 3"' : "";
+        return `<li class="${r.error ? "err" : ""}"><svg width="20" height="8" aria-hidden="true"><line x1="1" y1="4" x2="19" y2="4"
+          stroke="${esc(c.color)}" stroke-width="2.5" ${dash}/></svg><b>${esc(r.run_id)}</b> ${esc(r.label)}${r.error ? " · failed" : ""}</li>`;
+      }).join("");
+      const st = res.solver || {};
+      $("out-points-note").textContent =
+        st.method === "rk45" && st.output === "dense"
+          ? "RK45 run: points lie on a uniform time grid filled by the method's 4th-order dense output (accurate to the tolerance)."
+          : st.method === "rk45"
+            ? "RK45 run: points are the accepted solver steps, so their spacing in time is uneven."
+            : "RK4 run: points are actual solver steps at evenly spaced positions, never interpolated.";
+      describeSampling();
+      $("out-preview").hidden = true;
+    }
+
+    async function prepare() {
+      const req = currentRequest();
+      const k = samples();
+      const out = await api.call("export_csv", { ...req, samples: k });
+      state.files = {
+        timeseries: { name: `goodwin_timeseries_${stamp()}.csv`, text: out.timeseries_csv, rows: out.timeseries_rows },
+        parameters: { name: `goodwin_parameters_${stamp()}.csv`, text: out.parameters_csv, rows: out.runs },
+        meta: out,
+      };
+      showPreview();
+      return state.files;
+    }
+
+    function showPreview() {
+      const f = state.files;
+      const head = (t) => t.split("\n").slice(0, PREVIEW_LINES).join("\n") + (t.split("\n").length > PREVIEW_LINES + 1 ? "\n…" : "");
+      $("out-prev-ts").textContent = head(f.timeseries.text);
+      $("out-prev-par").textContent = head(f.parameters.text);
+      $("out-prev-ts-n").textContent = `${f.timeseries.rows.toLocaleString()} rows · ${(f.timeseries.text.length / 1024).toFixed(1)} KB`;
+      $("out-prev-par-n").textContent = `${f.parameters.rows} rows · ${(f.parameters.text.length / 1024).toFixed(1)} KB`;
+      $("out-preview").hidden = false;
+    }
+
+    function status(text, kind = "") {
+      const el = $("out-status");
+      el.textContent = text;
+      el.className = "out-status" + (kind ? " " + kind : "");
+    }
+
+    async function download(which) {
+      const btn = $(which === "timeseries" ? "out-dl-ts" : "out-dl-par");
+      btn.disabled = true;
+      status("Preparing the file in Python…");
+      try {
+        const files = await prepare();
+        const f = files[which];
+        const how = await saveText(f.name, f.text);
+        status(`${how === "saved" ? "Saved" : "Downloaded"} ${f.name} (${f.rows.toLocaleString()} rows).`, "ok");
+      } catch (e) {
+        const code = e && e.code;
+        if (code === "declined") status("Download cancelled.");
+        else if (code) status(`This view cannot save files (${code}). Use the preview's Copy button instead.`, "err");
+        else status(`${e.pyType || "Error"}: ${e.message}`, "err");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function copy(which) {
+      try {
+        if (!state.files) await prepare();
+        const text = state.files[which].text;
+        await navigator.clipboard.writeText(text);
+        status(`Copied ${which === "timeseries" ? "time series" : "parameters"} CSV to the clipboard.`, "ok");
+      } catch (e) {
+        const pre = $(which === "timeseries" ? "out-prev-ts" : "out-prev-par");
+        if (state.files) pre.textContent = state.files[which].text;
+        const sel = window.getSelection(), range = document.createRange();
+        range.selectNodeContents(pre);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        status("Clipboard unavailable here: the full CSV is selected in the preview, press Ctrl/⌘+C.", "err");
+      }
+    }
+
+    function wire() {
+      $("out-presets").innerHTML = PRESETS.map((n) =>
+        `<button type="button" class="chip out-preset" data-n="${n}" aria-pressed="false">${n}</button>`).join("");
+      $("out-presets").addEventListener("click", (ev) => {
+        const b = ev.target.closest(".out-preset");
+        if (!b) return;
+        $("out-all").checked = false;
+        $("out-samples").value = b.dataset.n;
+        describeSampling();
+      });
+      $("out-samples").addEventListener("input", describeSampling);
+      $("out-all").addEventListener("change", describeSampling);
+      $("out-dl-ts").addEventListener("click", () => download("timeseries"));
+      $("out-dl-par").addEventListener("click", () => download("parameters"));
+      $("out-preview-btn").addEventListener("click", async () => {
+        status("Preparing the preview in Python…");
+        try { await prepare(); status(""); } catch (e) { status(`${e.pyType || "Error"}: ${e.message}`, "err"); }
+      });
+      $("out-copy-ts").addEventListener("click", () => copy("timeseries"));
+      $("out-copy-par").addEventListener("click", () => copy("parameters"));
+    }
+
+    wire();
+    return { state, update, prepare, samples };
+  }
+
+  global.OutputPanel = { create, saveText };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+  <script>
+/*
+ * errorpanel.js — "Error control & solver statistics" section (UI only, no numerics).
+ *
+ * Everything shown here is computed by Python (core/solvers.py) and arrives in each run's
+ * result.solver: method, steps, rejected steps, derivative evaluations, step-size range and
+ * history, invariant drift, and the global error estimate from a refined re-run.
+ */
+(function (global) {
+  "use strict";
+
+  const esc = (x) => String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const sci = (x, d = 1) => (x == null || !Number.isFinite(x) ? "—" : Number(x).toExponential(d).replace(/\.0e/, "e"));
+  const num = (x) => (x == null ? "—" : Number(x).toLocaleString());
+  const hfmt = (x) => (x == null ? "—" : x >= 0.01 ? Number(x).toPrecision(3) : sci(x, 2));
+
+  /* Severity of an absolute error on variables that live around 0–1 (shares and rates). */
+  function level(err) {
+    if (err == null || !Number.isFinite(err)) return "";
+    if (err < 1e-6) return "good";
+    if (err < 1e-3) return "warn";
+    return "bad";
+  }
+
+  function create({ css, colorFor }) {
+    const $ = (id) => document.getElementById(id);
+    let chart = null;
+
+    function makeChart() {
+      chart = new Chart($("h-chart"), {
+        type: "scatter",
+        data: { datasets: [] },
+        options: {
+          animation: false, responsive: true, maintainAspectRatio: false, parsing: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (c) => `${c.dataset.label}: h = ${hfmt(c.parsed.y)} at t = ${c.parsed.x.toFixed(2)}` } },
+          },
+          elements: { point: { radius: 0 }, line: { borderWidth: 1.5 } },
+          scales: {
+            x: { type: "linear", title: { display: true, text: "t (years)" } },
+            y: { type: "logarithmic", title: { display: true, text: "step size h (years)" },
+              ticks: { maxTicksLimit: 6, callback: (v) => hfmt(v) } },
+          },
+        },
+      });
+    }
+
+    function tile(label, value, hint, cls = "") {
+      return `<div class="ec-tile ${cls}"><div class="k">${esc(label)}</div><div class="val">${value}</div>` +
+        (hint ? `<div class="hint">${hint}</div>` : "") + `</div>`;
+    }
+
+    function update(res, experiment) {
+      const st = res.solver;
+      const box = $("errc");
+      if (!st || !box) { if (box) box.hidden = true; return; }
+      box.hidden = false;
+      const p = res.params || {};
+      const rk45 = st.method === "rk45";
+      const ge = st.global_error;
+
+      $("errc-method").textContent = st.label || st.method;
+      const control = rk45
+        ? `rtol ${esc(sci(p.rtol))}<br>atol ${esc(sci(p.atol))}`
+        : `dt = ${esc(String(p.dt))}`;
+      const controlHint = rk45
+        ? "local error per step kept below atol + rtol·|y| (RMS norm)"
+        : "fixed step: no automatic control; local error ∝ dt⁵, global ∝ dt⁴";
+
+      let geVal, geHint, geCls = "";
+      if (!ge) {
+        geVal = "off"; geHint = "switch “Global error estimate” on in the Experiment block";
+      } else if (ge.skipped) {
+        geVal = "skipped"; geHint = esc(ge.skipped);
+      } else {
+        geVal = esc(sci(ge.max_abs, 2));
+        geCls = level(ge.max_abs);
+        geHint = `largest |error| over the run in u or v · at t<sub>end</sub>: ${esc(sci(ge.final_abs, 2))}`;
+      }
+
+      const tiles = [
+        tile("Error control", control, controlHint),
+        tile("Global error estimate", geVal, geHint, `big ${geCls}`),
+        tile("Accepted steps", num(st.steps) + (rk45 ? ` <span class="sub">+${num(st.rejected)} rejected</span>` : ""),
+          rk45 ? "rejected = step retried smaller because its error was too large" : "t_max / dt"),
+        tile("Derivative evaluations", num(st.f_evals) + (ge && ge.reference_f_evals ? ` <span class="sub">+${num(ge.reference_f_evals)} for the estimate</span>` : ""),
+          rk45 ? "7 stages per attempt, the last reused by the next step" : "4 per step"),
+        tile("Step size h", rk45 ? `${esc(hfmt(st.h_min))} – ${esc(hfmt(st.h_max))}` : esc(hfmt(st.h_min)),
+          rk45 ? `mean ${esc(hfmt(st.h_mean))} · smaller steps where the solution turns faster` : "constant"),
+        tile("Invariant drift", esc(sci(st.invariant_drift, 1)),
+          "relative change of the conserved H(u, v): a lower bound, blind to phase error"),
+      ];
+      if (rk45) {
+        tiles.push(tile("Largest local error ÷ tolerance", esc(Number(st.max_local_error_ratio).toFixed(2)),
+          "over accepted steps; ≤ 1 by construction"));
+      }
+      tiles.push(tile("Output points", num(st.output_points),
+        st.method === "rk4" ? "solver steps, evenly thinned" :
+          st.output === "dense" ? "uniform grid from RK45's 4th-order dense output" : "accepted steps only (uneven spacing)"));
+      $("errc-tiles").innerHTML = tiles.join("");
+
+      // one-line reading of the numbers
+      let note = "";
+      if (ge && !ge.skipped) {
+        note = `Estimated by re-solving the ${esc(ge.reference)}. `;
+        if (rk45 && p.rtol) {
+          const ratio = ge.max_abs / p.rtol;
+          note += `The global error is about ${ratio >= 10 ? Math.round(ratio) : ratio.toFixed(1)}× rtol: the tolerance bounds each step's error, and errors accumulate over the horizon. `;
+        } else if (!rk45) {
+          note += `Halving dt would divide it by about 16 (fourth order). `;
+        }
+      } else {
+        note = "Without the estimate, the invariant drift is the only accuracy signal, and it misses timing (phase) errors. ";
+      }
+      $("errc-note").innerHTML = note.trim();
+
+      // step-size history: base run in ink, each scenario in its own colour
+      if (!chart) makeChart();
+      const runs = [{ id: (experiment && experiment.base_id) || "S00", label: "base", st, color: css("--ink"), dash: [] }];
+      if (experiment) {
+        experiment.scenarios.filter((sc) => sc.result && sc.result.solver).forEach((sc) => {
+          const c = colorFor(sc);
+          runs.push({ id: sc.run_id, label: sc.label, st: sc.result.solver, color: c.color, dash: c.dash });
+        });
+      }
+      chart.data.datasets = runs.slice().reverse().map((r) => {
+        const hs = r.st.h_series;
+        const pts = hs.t.map((t, i) => ({ x: t, y: hs.h[i] }));
+        if (r.st.method === "rk4") pts.push({ x: res.t[res.t.length - 1], y: hs.h[0] });
+        return { label: `${r.id} · ${r.label}`, data: pts, showLine: true, stepped: rk45 ? "before" : false,
+          borderColor: r.color, borderDash: r.dash, borderWidth: r.id === runs[0].id ? 2.2 : 1.2 };
+      });
+      chart.update();
+
+      // per-run table when an exercise produced several runs
+      const table = $("errc-runs");
+      if (!experiment || !experiment.scenarios.length) {
+        table.hidden = true;
+        table.innerHTML = "";
+        return;
+      }
+      const rows = [{ run_id: runs[0].id, label: "base", result: res }].concat(experiment.scenarios);
+      const worst = rows.reduce((w, r) => {
+        const e = r.result && r.result.solver && r.result.solver.global_error && r.result.solver.global_error.max_abs;
+        return e != null && (w == null || e > w.e) ? { id: r.run_id, e } : w;
+      }, null);
+      table.hidden = false;
+      table.innerHTML = `<div class="table-scroll"><table>
+        <tr><th>ID</th><th>Run</th><th>Steps</th><th>Rejected</th><th>f-evals</th><th>h min – max</th><th>Global error est.</th><th>H drift</th></tr>
+        ${rows.map((r) => {
+          if (!r.result) return `<tr class="err"><td>${esc(r.run_id)}</td><td>${esc(r.label)}</td><td colspan="6">${esc(r.error.type)}: ${esc(r.error.message)}</td></tr>`;
+          const s = r.result.solver, g = s.global_error;
+          const e = g && !g.skipped ? g.max_abs : null;
+          return `<tr${worst && worst.id === r.run_id ? ' class="worst"' : ""}><td>${esc(r.run_id)}</td><td>${esc(r.label)}</td>
+            <td>${num(s.steps)}</td><td>${num(s.rejected)}</td><td>${num(s.f_evals)}</td>
+            <td>${esc(hfmt(s.h_min))} – ${esc(hfmt(s.h_max))}</td>
+            <td class="${level(e)}">${g ? (g.skipped ? "skipped" : esc(sci(e, 2))) : "off"}</td><td>${esc(sci(s.invariant_drift))}</td></tr>`;
+        }).join("")}
+      </table></div>` + (worst ? `<p class="errc-worst">Largest estimated error: <b>${esc(worst.id)}</b> (${esc(sci(worst.e, 2))}).</p>` : "");
+    }
+
+    return { update };
+  }
+
+  global.ErrorPanel = { create };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+  <script>
+/*
  * app.js — UI only: parameter controls, charts, summary, editor, tech info.
  * Simulation exercises (sensitivity) are delegated to experiments.js.
  * All numerics come from Python through api.js. This file never touches Pyodide or HTTP.
@@ -1296,14 +1869,63 @@ body.sens-on .seg { display: inline-flex; }
   const api = PyApi.create({ ...cfg, onStatus: setStatus });
   state.api = api;
   // Simulation exercises (sensitivity ±%, later grid/Sobol): UI state only; Python computes.
-  const exp = Experiments.create({ onChange: () => schedule(), setParam: (n, x) => setParam(n, x) });
+  const exp = Experiments.create({
+    onChange: () => schedule(),
+    setParam: (n, x) => setParam(n, x),
+    isActive: (n) => (state.isActive ? state.isActive(n) : true),   // skip parameters the method ignores
+  });
   state.exp = exp;
+  // Output results: run index + CSV export (files are built in Python, see core/export.py)
+  const output = OutputPanel.create({
+    api,
+    css,
+    colorFor: (sc) => exp.colorFor(sc),
+    // exactly the exercise on screen; with sensitivity off, the base run only (S00)
+    currentRequest: () => {
+      const req = exp.request({ ...state.params });
+      return req ? req.args : { kind: "deviation_oat", base: { ...state.params }, spec: { deviations: {} } };
+    },
+  });
+  state.output = output;
+  const errorPanel = ErrorPanel.create({ css, colorFor: (sc) => exp.colorFor(sc) });
 
   /* ---------------- controls built from Python's describe() ---------------- */
-  const GROUPS = { economy: "Economy", phillips: "Phillips curve", initial: "Initial state", numerics: "Numerics" };
+  const GROUPS = { system: "System", phillips: "Phillips curve", initial: "Initial state", experiment: "Experiment" };
+  // groups are shown in coloured blocks by role (from Python's describe()): system / initial / experiment
+  const ROLE_TITLES = { system: "System parameters", initial: "Initial state", experiment: "Experiment set-up" };
   const decimals = (step) => Math.max(0, (String(step).split(".")[1] || "").length);
 
   const esc = (x) => String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* Log-scale parameters (e.g. tolerances): the slider moves in decades, the model sees the value. */
+  const isLog = (p) => p.scale === "log";
+  const toSlider = (p, x) => (isLog(p) ? Math.log10(x) : x);
+  const fromSlider = (p, s) => (isLog(p) ? Number(Math.pow(10, s).toPrecision(6)) : s);
+  function fmtParam(p, x) {
+    if (isLog(p)) {
+      const e = Number(x).toExponential(1);           // "3.2e-8"
+      return e.replace(/\.0e/, "e");                  // "1e-8"
+    }
+    return Number(x).toFixed(decimals(p.step));
+  }
+  state.fmtParam = fmtParam;
+
+  /* A row shows only when its "applies" condition (e.g. {method: ["rk45"]}) holds for the current settings. */
+  function applies(item) {
+    const cond = item && item.applies;
+    if (!cond) return true;
+    return Object.entries(cond).every(([k, vals]) => vals.includes(state.params[k]));
+  }
+  function refreshApplies() {
+    [...(state.meta.choices || []), ...state.meta.parameters].forEach((item) => {
+      const row = document.querySelector(`#controls [data-name="${CSS.escape(item.name)}"]`);
+      if (row) row.hidden = !applies(item);
+    });
+  }
+  state.isActive = (name) => {
+    const item = [...(state.meta.choices || []), ...state.meta.parameters].find((x) => x.name === name);
+    return applies(item);
+  };
 
   /* keep = true keeps the current slider values where the parameter still exists (after a code edit),
      except for parameters listed in `reset`, whose definition changed in the code: those take the new default. */
@@ -1312,63 +1934,107 @@ body.sens-on .seg { display: inline-flex; }
     root.innerHTML = "";
     const previous = state.params;
     state.params = {};
+    // each group lists its choices (segmented buttons) first, then its numeric parameters
     const byGroup = {};
-    meta.parameters.forEach((p) => (byGroup[p.group] = byGroup[p.group] || []).push(p));
-    Object.entries(byGroup).forEach(([g, list]) => {
+    const add = (item, kind) => (byGroup[item.group] = byGroup[item.group] || []).push({ ...item, kind });
+    (meta.choices || []).forEach((c) => add(c, "choice"));
+    meta.parameters.forEach((p) => add(p, "param"));
+    const order = [...new Set(meta.parameters.map((p) => p.group).concat((meta.choices || []).map((c) => c.group)))];
+    let block = null;
+    order.forEach((g) => {
+      const list = byGroup[g].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "choice" ? -1 : 1));
+      const role = list[0].role || "system";
+      if (!block || block.dataset.role !== role) {
+        block = document.createElement("div");
+        block.className = `role-block role-${role}`;
+        block.dataset.role = role;
+        block.setAttribute("aria-label", ROLE_TITLES[role] || role);
+        root.appendChild(block);
+      }
       const sec = document.createElement("section");
       sec.className = "group";
       sec.innerHTML = `<h2>${esc(GROUPS[g] || g)}</h2>`;
-      list.forEach((p) => {
-        const old = previous[p.name];
-        const value = keep && !reset.has(p.name) && typeof old === "number" && old >= p.min && old <= p.max
-          ? old : p.default;
-        state.params[p.name] = value;
-        const div = document.createElement("div");
-        div.className = "param" + (reset.has(p.name) ? " changed" : "");
-        div.dataset.name = p.name;
-        div.innerHTML = `
-          <label for="p-${esc(p.name)}"><span>${esc(p.label)}</span><output id="o-${esc(p.name)}"></output></label>
-          <input type="range" id="p-${esc(p.name)}" name="${esc(p.name)}"
-                 min="${Number(p.min)}" max="${Number(p.max)}" step="${Number(p.step)}" value="${Number(value)}">
-          <div class="scale">
-            <button type="button" class="end" id="min-${esc(p.name)}" title="Set to the minimum">${esc(Number(p.min).toFixed(decimals(p.step)))}</button>
-            <span class="scale-mid"></span>
-            <button type="button" class="end" id="max-${esc(p.name)}" title="Set to the maximum">${esc(Number(p.max).toFixed(decimals(p.step)))}</button>
-          </div>`;
-        sec.appendChild(div);
-        const input = div.querySelector("input");
-        const out = div.querySelector("output");
-        exp.attach(div, p, input);
-        div.querySelector(".end[id^=min-]").addEventListener("click", () => setParam(p.name, p.min));
-        div.querySelector(".end[id^=max-]").addEventListener("click", () => setParam(p.name, p.max));
-        const show = () => (out.textContent = Number(input.value).toFixed(decimals(p.step)));
-        show();
-        input.addEventListener("input", () => {
-          div.classList.remove("changed");
-          state.params[p.name] = Number(input.value);
-          show();
-          schedule();
-        });
-      });
-      root.appendChild(sec);
+      list.forEach((item) => (item.kind === "choice" ? buildChoice(sec, item, previous, keep, reset)
+        : buildParam(sec, item, previous, keep, reset)));
+      block.appendChild(sec);
+    });
+    refreshApplies();
+  }
+
+  function buildChoice(sec, c, previous, keep, reset) {
+    const values = c.options.map((o) => o.value);
+    const old = previous[c.name];
+    const value = keep && !reset.has(c.name) && values.includes(old) ? old : c.default;
+    state.params[c.name] = value;
+    const div = document.createElement("div");
+    div.className = "param choice" + (reset.has(c.name) ? " changed" : "");
+    div.dataset.name = c.name;
+    div.innerHTML = `<span class="choice-label" id="cl-${esc(c.name)}">${esc(c.label)}</span>
+      <span class="seg seg-choice" role="radiogroup" aria-labelledby="cl-${esc(c.name)}">
+        ${c.options.map((o) => `<label><input type="radio" name="c-${esc(c.name)}" id="c-${esc(c.name)}-${esc(o.value)}"
+          value="${esc(o.value)}" ${o.value === value ? "checked" : ""}> ${esc(o.label)}</label>`).join("")}
+      </span>`;
+    sec.appendChild(div);
+    div.querySelectorAll("input").forEach((el) => el.addEventListener("change", () => {
+      div.classList.remove("changed");
+      state.params[c.name] = el.value;
+      refreshApplies();
+      schedule();
+    }));
+  }
+
+  function buildParam(sec, p, previous, keep, reset) {
+    const old = previous[p.name];
+    const value = keep && !reset.has(p.name) && typeof old === "number" && old >= p.min && old <= p.max
+      ? old : p.default;
+    state.params[p.name] = value;
+    const div = document.createElement("div");
+    div.className = "param" + (reset.has(p.name) ? " changed" : "") + (isLog(p) ? " log" : "");
+    div.dataset.name = p.name;
+    div.innerHTML = `
+      <label for="p-${esc(p.name)}"><span>${esc(p.label)}</span><output id="o-${esc(p.name)}"></output></label>
+      <input type="range" id="p-${esc(p.name)}" name="${esc(p.name)}"
+             min="${toSlider(p, Number(p.min))}" max="${toSlider(p, Number(p.max))}" step="${Number(p.step)}"
+             value="${toSlider(p, Number(value))}">
+      <div class="scale">
+        <button type="button" class="end" id="min-${esc(p.name)}" title="Set to the minimum">${esc(fmtParam(p, p.min))}</button>
+        <span class="scale-mid"></span>
+        <button type="button" class="end" id="max-${esc(p.name)}" title="Set to the maximum">${esc(fmtParam(p, p.max))}</button>
+      </div>`;
+    sec.appendChild(div);
+    const input = div.querySelector("input");
+    const out = div.querySelector("output");
+    exp.attach(div, p, input);
+    div.querySelector(".end[id^=min-]").addEventListener("click", () => setParam(p.name, p.min));
+    div.querySelector(".end[id^=max-]").addEventListener("click", () => setParam(p.name, p.max));
+    const show = () => (out.textContent = fmtParam(p, state.params[p.name]));
+    show();
+    input.addEventListener("input", () => {
+      div.classList.remove("changed");
+      state.params[p.name] = fromSlider(p, Number(input.value));
+      show();
+      schedule();
     });
   }
 
-  /* Move a parameter's slider to a value (clamped to its range) and re-run, as if dragged there. */
+  /* Move a parameter to a value (clamped to its range) and re-run, as if the slider were dragged there. */
   function setParam(name, value) {
     const input = $("p-" + name);
-    if (!input) return;
-    const x = Math.min(Number(input.max), Math.max(Number(input.min), Number(value)));
-    input.value = x;
+    const p = state.meta.parameters.find((x) => x.name === name);
+    if (!input || !p) return;
+    const x = Math.min(Number(p.max), Math.max(Number(p.min), Number(value)));
+    input.value = toSlider(p, x);
     input.dispatchEvent(new Event("input"));
+    state.params[name] = x;                       // exact value, not the slider's rounded position
+    $("o-" + name).textContent = fmtParam(p, x);
   }
 
   function resetDefaults() {
-    state.meta.parameters.forEach((p) => {
-      const input = $("p-" + p.name);
-      input.value = p.default;
-      input.dispatchEvent(new Event("input"));
+    (state.meta.choices || []).forEach((c) => {
+      const el = $(`c-${c.name}-${c.default}`);
+      if (el && !el.checked) { el.checked = true; el.dispatchEvent(new Event("change")); }
     });
+    state.meta.parameters.forEach((p) => setParam(p.name, p.default));
   }
 
   /* ------------------------------- charts ------------------------------- */
@@ -1425,9 +2091,9 @@ body.sens-on .seg { display: inline-flex; }
       tsChart.data.datasets = [
         ...scenarios.map((sc) => {
           const c = exp.colorFor(sc);
-          return { label: sc.label, data: xy(sc.result.t, sc.result[key]), borderColor: c.color, borderDash: c.dash, borderWidth: 1.5 };
+          return { label: `${sc.run_id} · ${sc.label}`, data: xy(sc.result.t, sc.result[key]), borderColor: c.color, borderDash: c.dash, borderWidth: 1.5 };
         }),
-        { label: `base · ${name}`, data: xy(t, res[key]), borderColor: css("--ink"), borderWidth: 2.5 },
+        { label: `${experiment.base_id} · base · ${name}`, data: xy(t, res[key]), borderColor: css("--ink"), borderWidth: 2.5 },
         { label: key + "*", data: hline(t, eq[key + "_star"]), borderColor: css("--ink"), borderDash: [2, 4], borderWidth: 1, noLegend: true },
       ];
     }
@@ -1436,10 +2102,10 @@ body.sens-on .seg { display: inline-flex; }
     phaseChart.data.datasets = [
       ...scenarios.map((sc) => {
         const c = exp.colorFor(sc);
-        return { label: sc.label, data: xy(sc.result.v, sc.result.u), showLine: true, pointRadius: 0,
+        return { label: `${sc.run_id} · ${sc.label}`, data: xy(sc.result.v, sc.result.u), showLine: true, pointRadius: 0,
           borderColor: c.color, borderDash: c.dash, borderWidth: 1.5 };
       }),
-      { label: experiment ? "base orbit" : "orbit", data: xy(v, u), showLine: true, pointRadius: 0,
+      { label: experiment ? `${experiment.base_id} · base orbit` : "orbit", data: xy(v, u), showLine: true, pointRadius: 0,
         borderColor: experiment ? css("--ink") : css("--accent"), borderWidth: experiment ? 2.5 : 2 },
       { label: "equilibrium (v*, u*)", data: [{ x: eq.v_star, y: eq.u_star }], pointRadius: 5, pointStyle: "crossRot",
         borderColor: css("--ink"), borderWidth: 2, noLegend: !!experiment },
@@ -1469,6 +2135,8 @@ body.sens-on .seg { display: inline-flex; }
     w.textContent = warnings.join(" ");
 
     if (experiment) exp.apply(experiment); else exp.clear();
+    output.update(res, experiment);
+    errorPanel.update(res, experiment);
   }
 
   /* -------------------------- run loop (debounced) -------------------------- */
@@ -1500,7 +2168,10 @@ body.sens-on .seg { display: inline-flex; }
       render(res, experiment);
       setState("ready");
       const n = experiment ? experiment.scenarios.length : 0;
-      setStatus(`${((n + 1) * res.summary.steps).toLocaleString()} RK4 steps` +
+      const runs = [res, ...(experiment ? experiment.scenarios.filter((sc) => sc.result).map((sc) => sc.result) : [])];
+      const steps = runs.reduce((a, r) => a + ((r.solver && r.solver.steps) || r.summary.steps || 0), 0);
+      const label = res.solver ? res.solver.method.toUpperCase() : "RK4";
+      setStatus(`${steps.toLocaleString()} ${label} steps` +
         (experiment ? ` · ${n + 1} simulations (base + ${n} scenario${n === 1 ? "" : "s"})` : "") +
         ` · ${ms.toFixed(0)} ms round-trip · ${api.info.runtime}`);
     } catch (e) {
@@ -1515,7 +2186,7 @@ body.sens-on .seg { display: inline-flex; }
   }
 
   /* ----------------------------- Python editor ----------------------------- */
-  const APP_VERSION = "1.2.0";
+  const APP_VERSION = "1.3.0";
   let editor = null;
   let original = "";
   let errorLine = null;
@@ -1539,10 +2210,12 @@ body.sens-on .seg { display: inline-flex; }
 
   /* Parameters whose definition (default, range, step, label) differs between two describe() results. */
   function changedParams(before, after) {
-    const old = Object.fromEntries(((before && before.parameters) || []).map((p) => [p.name, p]));
-    return after.parameters.filter((p) => {
+    const items = (m) => [...((m && m.parameters) || []), ...((m && m.choices) || [])];
+    const old = Object.fromEntries(items(before).map((p) => [p.name, p]));
+    return items(after).filter((p) => {
       const o = old[p.name];
-      return !o || ["default", "min", "max", "step", "label", "group"].some((k) => o[k] !== p[k]);
+      return !o || ["default", "min", "max", "step", "label", "group", "scale"].some((k) => o[k] !== p[k])
+        || JSON.stringify(o.options) !== JSON.stringify(p.options) || JSON.stringify(o.applies) !== JSON.stringify(p.applies);
     });
   }
 
@@ -1710,7 +2383,39 @@ body.sens-on .seg { display: inline-flex; }
       row("Web Worker", "Python off the UI thread", typeof Worker !== "undefined" ? (api.info.runtime.includes("Worker") ? "in use (ES module worker)" : "available, not used") : "unavailable"),
       row("WebAssembly", "runtime support", typeof WebAssembly === "object" ? "supported" : "unsupported"),
     ].join("");
-    body.innerHTML = `<h3>Front end · JavaScript</h3><table>${front}</table><h3>Python side</h3><p class="na">Asking the runtime…</p>`;
+    const where = cfg.mode === "server"
+      ? "on the server: FastAPI receives <code>POST /api/{function}</code> with JSON arguments and calls the same module"
+      : "in your browser: Pyodide (CPython compiled to WebAssembly) runs it inside a Web Worker, off the UI thread";
+    const specs = `
+      <h3>Solver</h3>
+      <ul class="specs">
+        <li><b>Methods</b> · selectable in the Experiment block, both pure Python (standard library only) in
+          <code>core/solvers.py</code>: <b>RK4</b>, classical 4th-order Runge–Kutta with fixed step <code>dt</code> (no error control);
+          <b>RK45</b>, Dormand–Prince 5(4) with adaptive step: the embedded 4th-order solution estimates each step's local
+          error, a step is accepted when its RMS error ≤ atol + rtol·|y|, and the next step is h·0.9·err<sup>−1/5</sup>
+          (limited to ×0.2…×10). RK45 fills a uniform output grid with its 4th-order dense output, or reports the
+          accepted steps only.</li>
+        <li><b>Global error estimate</b> · the same problem is re-solved with tighter control (RK4: dt/2 with the
+          Richardson factor 16/15; RK45: rtol/10 and atol/10) and compared at every output time. It roughly triples the
+          cost of a run (RK4) and can be switched off.</li>
+        <li><b>Output</b> · RK4 keeps up to about 2,000 evenly spaced solver steps per run; RK45 gives 1,001 grid points
+          (dense output) or its accepted steps.</li>
+        <li><b>Accuracy check</b> · the conserved quantity H(u, v) is evaluated at every step; its largest relative drift is reported.</li>
+        <li><b>Diagnostics</b> · cycle period from upward crossings of u* (located on the dense interpolant under RK45);
+          warnings when u or v exceed 1; the run stops on instability, step-size underflow or more than 200,000 steps.</li>
+        <li><b>Sensitivity</b> · one extra run per non-zero deviation, one parameter at a time, bounds clamped to each parameter's range.</li>
+      </ul>
+      <h3>Architecture</h3>
+      <ul class="specs">
+        <li><b>Python side</b> · <code>core/goodwin.py</code> (model) · <code>core/experiments.py</code> (exercises, run ids)
+          · <code>core/export.py</code> (CSV files) · <code>core/lab.py</code> (the only public entry point).</li>
+        <li><b>Where it runs now</b> · ${where}.</li>
+        <li><b>Front end</b> · HTML/CSS/JavaScript: <code>app.js</code> (controls, charts, editor), <code>experiments.js</code>
+          (sensitivity UI), <code>output.js</code> (results and export). None of it computes the model.</li>
+        <li><b>Bridge</b> · <code>api.js</code> is the only link between the two sides: <code>call(fn, args)</code> → JSON, identical in
+          browser and server mode, so moving Python to a server changes a setting, not the code.</li>
+      </ul>`;
+    body.innerHTML = `${specs}<h3>Front end · JavaScript</h3><table>${front}</table><h3>Python side</h3><p class="na">Asking the runtime…</p>`;
     try {
       const t = await api.techInfo();
       let back;
